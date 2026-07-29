@@ -79,25 +79,31 @@ export const PdfPreviewModal: React.FC<PdfPreviewModalProps> = ({
       </Dialog>
 
       {mounted && isOpen && typeof document !== 'undefined' && createPortal(
-        <div id="global-print-area" className="hidden print:block print:w-full print:bg-white print:text-black print:absolute print:left-0 print:top-0 print:m-0 print:p-12 print:overflow-visible print:z-[99999] relative">
+        <div id="global-print-area" className="hidden print:block print:w-full print:bg-white print:text-black print:absolute print:left-0 print:top-0 print:m-0 print:overflow-visible print:z-[99999] relative" style={{ padding: '40px', boxSizing: 'border-box' }}>
           
           {/* Fixed overlay for border and watermark that repeats on every printed page */}
-          <div className="hidden print:flex fixed inset-0 z-0 items-center justify-center pointer-events-none print:p-4">
+          <div className="hidden print:flex fixed inset-0 z-0 items-center justify-center pointer-events-none">
              {/* Border */}
-             <div className="absolute inset-4 border-2 border-slate-700 pointer-events-none rounded-sm" />
+             <div className="absolute border-2 border-slate-700 pointer-events-none rounded-sm" style={{ top: '15px', bottom: '15px', left: '15px', right: '15px' }} />
              
              {/* Watermark Logo */}
              {settings?.logoUrl && (
                <img 
                  src={settings.logoUrl} 
                  alt="Watermark" 
-                 className="opacity-20 pointer-events-none"
-                 style={{ maxWidth: '60%', maxHeight: '60%', filter: 'grayscale(100%) brightness(30%) contrast(150%)' }}
+                 className="pointer-events-none"
+                 style={{ 
+                   maxWidth: '60%', 
+                   maxHeight: '60%', 
+                   opacity: 0.15,
+                   filter: 'grayscale(100%)', 
+                   mixBlendMode: 'multiply' 
+                 }}
                />
              )}
           </div>
 
-          <div className="relative z-10 w-full h-full">
+          <div className="relative z-10 w-full h-full" style={{ boxSizing: 'border-box' }}>
             {children}
           </div>
         </div>,
