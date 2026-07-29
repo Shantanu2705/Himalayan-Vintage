@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Printer, Share2, Download } from 'lucide-react';
+import { useFleetStore } from '@/lib/store/use-fleet-store';
 
 interface PdfPreviewModalProps {
   isOpen: boolean;
@@ -28,6 +29,7 @@ export const PdfPreviewModal: React.FC<PdfPreviewModalProps> = ({
   children,
 }) => {
   const [mounted, setMounted] = React.useState(false);
+  const settings = useFleetStore((state) => state.settings);
 
   React.useEffect(() => {
     setMounted(true);
@@ -77,8 +79,27 @@ export const PdfPreviewModal: React.FC<PdfPreviewModalProps> = ({
       </Dialog>
 
       {mounted && isOpen && typeof document !== 'undefined' && createPortal(
-        <div id="global-print-area" className="hidden print:block print:w-full print:bg-white print:text-black print:absolute print:left-0 print:top-0 print:m-0 print:p-0 print:overflow-visible print:z-[99999]">
-          {children}
+        <div id="global-print-area" className="hidden print:block print:w-full print:bg-white print:text-black print:absolute print:left-0 print:top-0 print:m-0 print:p-[15mm] print:overflow-visible print:z-[99999] relative">
+          
+          {/* Fixed overlay for border and watermark that repeats on every printed page */}
+          <div className="hidden print:flex fixed inset-0 z-0 items-center justify-center pointer-events-none" style={{ padding: '10mm' }}>
+             {/* Border */}
+             <div className="absolute inset-[10mm] border-2 border-slate-700 pointer-events-none rounded-sm" />
+             
+             {/* Watermark Logo */}
+             {settings?.logoUrl && (
+               <img 
+                 src={settings.logoUrl} 
+                 alt="Watermark" 
+                 className="opacity-15 grayscale pointer-events-none"
+                 style={{ maxWidth: '60%', maxHeight: '60%', filter: 'grayscale(100%) contrast(150%) brightness(50%)' }}
+               />
+             )}
+          </div>
+
+          <div className="relative z-10 w-full h-full">
+            {children}
+          </div>
         </div>,
         document.body
       )}

@@ -126,7 +126,7 @@
     border-color: #e2e8f0 !important;
   }
   @page {
-    margin: 10mm;
+    margin: 0;
     size: A4;
   }
 }
