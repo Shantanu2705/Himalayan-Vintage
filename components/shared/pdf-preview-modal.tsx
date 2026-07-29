@@ -79,7 +79,7 @@ export const PdfPreviewModal: React.FC<PdfPreviewModalProps> = ({
       </Dialog>
 
       {mounted && isOpen && typeof document !== 'undefined' && createPortal(
-        <div id="global-print-area" className="hidden print:block print:w-full print:bg-white print:text-black print:absolute print:left-0 print:top-0 print:m-0 print:overflow-visible print:z-[99999] relative" style={{ padding: '40px', boxSizing: 'border-box' }}>
+        <div id="global-print-area" className="hidden print:block print:w-full print:bg-white print:text-black print:absolute print:left-0 print:top-0 print:m-0 print:overflow-visible print:z-[99999] relative">
           
           {/* Fixed overlay for border and watermark that repeats on every printed page */}
           <div className="hidden print:flex fixed inset-0 z-0 items-center justify-center pointer-events-none">
@@ -103,7 +103,7 @@ export const PdfPreviewModal: React.FC<PdfPreviewModalProps> = ({
              )}
           </div>
 
-          <div className="relative z-10 w-full h-full" style={{ boxSizing: 'border-box' }}>
+          <div className="relative z-10 w-full h-full mx-auto max-w-[210mm]" style={{ boxSizing: 'border-box', padding: '40px' }}>
             {children}
           </div>
         </div>,
