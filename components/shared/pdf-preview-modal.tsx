@@ -79,20 +79,20 @@ export const PdfPreviewModal: React.FC<PdfPreviewModalProps> = ({
       </Dialog>
 
       {mounted && isOpen && typeof document !== 'undefined' && createPortal(
-        <div id="global-print-area" className="hidden print:block print:w-full print:bg-white print:text-black print:absolute print:left-0 print:top-0 print:m-0 print:p-[15mm] print:overflow-visible print:z-[99999] relative">
+        <div id="global-print-area" className="hidden print:block print:w-full print:bg-white print:text-black print:absolute print:left-0 print:top-0 print:m-0 print:p-12 print:overflow-visible print:z-[99999] relative">
           
           {/* Fixed overlay for border and watermark that repeats on every printed page */}
-          <div className="hidden print:flex fixed inset-0 z-0 items-center justify-center pointer-events-none" style={{ padding: '10mm' }}>
+          <div className="hidden print:flex fixed inset-0 z-0 items-center justify-center pointer-events-none print:p-4">
              {/* Border */}
-             <div className="absolute inset-[10mm] border-2 border-slate-700 pointer-events-none rounded-sm" />
+             <div className="absolute inset-4 border-2 border-slate-700 pointer-events-none rounded-sm" />
              
              {/* Watermark Logo */}
              {settings?.logoUrl && (
                <img 
                  src={settings.logoUrl} 
                  alt="Watermark" 
-                 className="opacity-15 grayscale pointer-events-none"
-                 style={{ maxWidth: '60%', maxHeight: '60%', filter: 'grayscale(100%) contrast(150%) brightness(50%)' }}
+                 className="opacity-20 pointer-events-none"
+                 style={{ maxWidth: '60%', maxHeight: '60%', filter: 'grayscale(100%) brightness(30%) contrast(150%)' }}
                />
              )}
           </div>
