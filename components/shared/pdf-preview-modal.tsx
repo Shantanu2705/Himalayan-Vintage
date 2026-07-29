@@ -103,9 +103,25 @@ export const PdfPreviewModal: React.FC<PdfPreviewModalProps> = ({
              )}
           </div>
 
-          <div className="relative z-10 w-full h-full mx-auto max-w-[210mm]" style={{ boxSizing: 'border-box', padding: '40px' }}>
-            {children}
-          </div>
+          <table className="relative z-10 w-full mx-auto max-w-[210mm]" style={{ boxSizing: 'border-box' }}>
+            <thead>
+              <tr>
+                <td style={{ height: '40px' }}></td>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style={{ padding: '0 40px' }}>
+                  {children}
+                </td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr>
+                <td style={{ height: '40px' }}></td>
+              </tr>
+            </tfoot>
+          </table>
         </div>,
         document.body
       )}
