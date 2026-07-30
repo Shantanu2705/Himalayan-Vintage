@@ -107,7 +107,7 @@ function SmartQuotationBuilderForm() {
     if (editId) {
       const q = quotations.find((q) => q.id === editId);
       if (q) {
-        setQType(q.type);
+        setQType(q.type || 'tourist');
         setClientName(q.clientName || '');
         setClientPhone(q.clientPhone || '');
         setClientEmail(q.clientEmail || '');
