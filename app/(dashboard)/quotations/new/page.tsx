@@ -34,8 +34,9 @@ function SmartQuotationBuilderForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const enquiryId = searchParams.get('enquiryId');
+  const editId = searchParams.get('editId');
 
-  const { enquiries, addQuotation, quotations, inclusions: masterInclusions, exclusions: masterExclusions } = useFleetStore();
+  const { enquiries, addQuotation, updateQuotation, quotations, inclusions: masterInclusions, exclusions: masterExclusions } = useFleetStore();
 
   const [qType, setQType] = useState<QuotationType | string>('tourist');
   const [clientName, setClientName] = useState('');
@@ -102,7 +103,41 @@ function SmartQuotationBuilderForm() {
         if (enq.passengers) setPassengers(enq.passengers);
       }
     }
-  }, [enquiryId, enquiries]);
+
+    if (editId) {
+      const q = quotations.find((q) => q.id === editId);
+      if (q) {
+        setQType(q.type);
+        setClientName(q.clientName || '');
+        setClientPhone(q.clientPhone || '');
+        setClientEmail(q.clientEmail || '');
+        setCompanyName(q.companyName || '');
+        setGstin(q.gstin || '');
+        setPickup(q.pickupLocation || '');
+        setDestination(q.destination || '');
+        setVehicle(q.vehicle || '');
+        if (q.startDate) setStartDate(q.startDate.split('T')[0]);
+        if (q.days) setDays(q.days);
+        if (q.passengers) setPassengers(q.passengers);
+
+        if (q.touristPricing) {
+          setPerDayRate(q.touristPricing.perDay || 0);
+          setExtraSightseeing(q.touristPricing.extraSightseeing || 0);
+          setPermitCharges(q.touristPricing.permits || 0);
+          setTollParking(q.touristPricing.toll || 0);
+        }
+        if (q.corporatePricing) {
+          setPerKmRate(q.corporatePricing.perKm || 0);
+          setDriverAllowance(q.corporatePricing.driverAllowance || 0);
+          setTollParking(q.corporatePricing.toll || 0);
+        }
+
+        if (q.itinerary && q.itinerary.length > 0) setItinerary(q.itinerary);
+        if (q.inclusions && q.inclusions.length > 0) setSelectedInclusions(q.inclusions);
+        if (q.exclusions && q.exclusions.length > 0) setSelectedExclusions(q.exclusions);
+      }
+    }
+  }, [enquiryId, editId, enquiries, quotations]);
 
   // Calculate totals
   const calcResult =
@@ -148,36 +183,67 @@ function SmartQuotationBuilderForm() {
       return;
     }
 
-    const newId = `q-${Date.now()}`;
-    const newNo = `Q-2026-${String(quotations.length + 101).padStart(3, '0')}`;
+    if (editId) {
+      const existing = quotations.find((q) => q.id === editId);
+      if (existing) {
+        await updateQuotation({
+          ...existing,
+          type: qType as QuotationType,
+          clientName,
+          clientPhone,
+          clientEmail,
+          companyName,
+          gstin,
+          pickupLocation: pickup,
+          destination,
+          vehicle,
+          startDate: new Date(startDate).toISOString(),
+          days: Number(days),
+          passengers: Number(passengers),
+          baseAmount: calcResult.baseAmount,
+          subtotal: calcResult.subtotal,
+          gstAmount: calcResult.gstAmount,
+          totalAmount: calcResult.totalAmount,
+          status,
+          itinerary,
+          inclusions: selectedInclusions,
+          exclusions: selectedExclusions,
+          touristPricing: qType === 'tourist' ? { perDay: perDayRate, extraSightseeing, permits: permitCharges, toll: tollParking } : undefined,
+          corporatePricing: qType === 'corporate' ? { perKm: perKmRate, driverAllowance, toll: tollParking } : undefined,
+        });
+      }
+    } else {
+      const newId = `q-${Date.now()}`;
+      const newNo = `Q-2026-${String(quotations.length + 101).padStart(3, '0')}`;
 
-    await addQuotation({
-      id: newId,
-      quotationNo: newNo,
-      type: qType,
-      clientName,
-      clientPhone,
-      clientEmail,
-      companyName,
-      gstin,
-      pickupLocation: pickup,
-      destination,
-      vehicle,
-      startDate: new Date(startDate).toISOString(),
-      days: Number(days),
-      passengers: Number(passengers),
-      baseAmount: calcResult.baseAmount,
-      subtotal: calcResult.subtotal,
-      gstAmount: calcResult.gstAmount,
-      totalAmount: calcResult.totalAmount,
-      status,
-      createdAt: new Date().toISOString(),
-      itinerary,
-      inclusions: selectedInclusions,
-      exclusions: selectedExclusions,
-      touristPricing: qType === 'tourist' ? { perDay: perDayRate, extraSightseeing, permits: permitCharges, toll: tollParking } : undefined,
-      corporatePricing: qType === 'corporate' ? { perKm: perKmRate, driverAllowance, toll: tollParking } : undefined,
-    });
+      await addQuotation({
+        id: newId,
+        quotationNo: newNo,
+        type: qType as QuotationType,
+        clientName,
+        clientPhone,
+        clientEmail,
+        companyName,
+        gstin,
+        pickupLocation: pickup,
+        destination,
+        vehicle,
+        startDate: new Date(startDate).toISOString(),
+        days: Number(days),
+        passengers: Number(passengers),
+        baseAmount: calcResult.baseAmount,
+        subtotal: calcResult.subtotal,
+        gstAmount: calcResult.gstAmount,
+        totalAmount: calcResult.totalAmount,
+        status,
+        createdAt: new Date().toISOString(),
+        itinerary,
+        inclusions: selectedInclusions,
+        exclusions: selectedExclusions,
+        touristPricing: qType === 'tourist' ? { perDay: perDayRate, extraSightseeing, permits: permitCharges, toll: tollParking } : undefined,
+        corporatePricing: qType === 'corporate' ? { perKm: perKmRate, driverAllowance, toll: tollParking } : undefined,
+      });
+    }
 
     router.push('/quotations');
   };
@@ -190,9 +256,9 @@ function SmartQuotationBuilderForm() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Smart Quotation Builder</h1>
+            <h1 className="text-2xl font-bold tracking-tight">{editId ? 'Edit Quotation' : 'Smart Quotation Builder'}</h1>
             <p className="text-sm text-muted-foreground">
-              Build dynamic multi-day tour pricing and customized itineraries with live tax calculation.
+              {editId ? 'Update dynamic multi-day tour pricing and customized itineraries.' : 'Build dynamic multi-day tour pricing and customized itineraries with live tax calculation.'}
             </p>
           </div>
         </div>

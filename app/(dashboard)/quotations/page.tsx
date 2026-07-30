@@ -27,6 +27,7 @@ import {
   Phone,
   CheckCircle2,
   Mail,
+  Edit,
 } from 'lucide-react';
 
 export default function QuotationsListPage() {
@@ -60,6 +61,10 @@ export default function QuotationsListPage() {
 
   const handleConvertToBooking = (q: Quotation) => {
     router.push(`/bookings?fromQuotationId=${q.id}`);
+  };
+
+  const handleEdit = (q: Quotation) => {
+    router.push(`/quotations/new?editId=${q.id}`);
   };
 
   return (
@@ -205,6 +210,15 @@ export default function QuotationsListPage() {
                           title="Duplicate Quotation"
                         >
                           <Copy className="h-3.5 w-3.5 text-muted-foreground" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/30 font-semibold"
+                          onClick={() => handleEdit(q)}
+                          title="Edit Quotation"
+                        >
+                          <Edit className="h-3.5 w-3.5 mr-1" /> Edit
                         </Button>
                         <Button
                           variant="ghost"
