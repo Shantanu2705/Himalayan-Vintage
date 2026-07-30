@@ -550,8 +550,8 @@ function BillingHubContent() {
                   {settings?.logoUrl ? (
                     <img src={settings.logoUrl} alt="Company Logo" className="h-14 w-auto max-w-[180px] object-contain" />
                   ) : (
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-white font-bold text-xl">
-                      <Bus className="h-7 w-7" />
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#0f172a] shadow-sm">
+                      <img src="/logo-icon.svg" className="h-9 w-9 object-contain" alt="Logo" />
                     </div>
                   )}
                   <div>

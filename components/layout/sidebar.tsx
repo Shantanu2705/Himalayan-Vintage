@@ -53,9 +53,7 @@ export const Sidebar: React.FC<{ className?: string; onCloseMobile?: () => void 
           {settings?.logoUrl ? (
             <img src={settings.logoUrl} alt="Company Logo" className="h-9 w-9 rounded-lg object-contain bg-white border p-0.5 shrink-0 shadow-xs" />
           ) : (
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-md">
-              <Bus className="h-5 w-5" />
-            </div>
+            <img src="/logo-icon.svg" alt="Company Logo" className="h-10 w-10 shrink-0 object-contain" />
           )}
           <div className="flex flex-col truncate">
             <span className="leading-none text-primary truncate font-bold text-base">{settings?.companyName?.split(' ')[0] || 'Himalayan'}</span>

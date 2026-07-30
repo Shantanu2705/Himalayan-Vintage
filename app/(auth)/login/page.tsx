@@ -61,8 +61,8 @@ export default function LoginPage() {
       <div className="w-full max-w-md relative z-10 animate-in fade-in-50 zoom-in-95 duration-300">
         {/* Brand Header */}
         <div className="mb-6 flex flex-col items-center text-center">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-500/30 mb-3 ring-4 ring-white/10">
-            <Bus className="h-8 w-8" />
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#0f172a] shadow-lg shadow-black/50 mb-3 ring-4 ring-white/10">
+            <img src="/logo-icon.svg" alt="Logo" className="h-10 w-10 object-contain" />
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
             Himalayan Fleet

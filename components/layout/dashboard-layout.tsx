@@ -31,8 +31,8 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
     return (
       <div className="flex min-h-screen w-full items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground animate-bounce shadow-lg">
-            <Bus className="h-6 w-6" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg">
+            <img src="/logo-icon.svg" alt="Logo" className="h-7 w-7 object-contain" />
           </div>
           <span className="text-sm font-semibold text-muted-foreground animate-pulse">
             Loading Himalayan Fleet Enterprise...
