@@ -132,7 +132,7 @@ function SmartQuotationBuilderForm() {
           setTollParking(q.corporatePricing.toll || 0);
         }
 
-        if (q.itinerary && q.itinerary.length > 0) setItinerary(q.itinerary);
+        if (q.itinerary && q.itinerary.length > 0) setItinerary(q.itinerary as ItineraryDay[]);
         if (q.inclusions && q.inclusions.length > 0) setSelectedInclusions(q.inclusions);
         if (q.exclusions && q.exclusions.length > 0) setSelectedExclusions(q.exclusions);
       }
