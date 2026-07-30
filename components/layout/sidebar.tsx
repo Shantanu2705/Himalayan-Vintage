@@ -32,17 +32,12 @@ export const Sidebar: React.FC<{ className?: string; onCloseMobile?: () => void 
 
   const navItems = [
     { title: 'Dashboard', href: '/', icon: LayoutDashboard },
+    { title: 'Calendar', href: '/calendar', icon: CalendarCheck },
     { title: 'Enquiries', href: '/enquiries', icon: MessageSquareQuote },
     { title: 'Quotations', href: '/quotations', icon: FileText },
-    { title: 'Bookings', href: '/bookings', icon: CalendarCheck },
-    { title: 'Billing & Receipts', href: '/billing', icon: Receipt },
-    { title: 'Vehicles Fleet', href: '/vehicles', icon: Car },
-    { title: 'Drivers Directory', href: '/drivers', icon: Users },
-    { title: 'Corporate Contracts', href: '/corporate', icon: Building2 },
-    { title: 'Routes Master', href: '/routes', icon: MapPin },
-    { title: 'Reports & Analytics', href: '/reports', icon: BarChart3 },
-    ...(user?.role === 'admin' ? [{ title: 'User Management', href: '/users', icon: ShieldCheck }] : []),
-    { title: 'Company Settings', href: '/settings', icon: Settings },
+    { title: 'Billing', href: '/billing', icon: Receipt },
+    { title: 'Reports', href: '/reports', icon: BarChart3 },
+    { title: 'Settings', href: '/settings', icon: Settings },
   ];
 
   return (
