@@ -475,12 +475,20 @@ function BookingsHubContent() {
   );
 }
 
-export default function BookingsPage() {
+function BookingsPageInner() {
   return (
     <DashboardLayout>
       <Suspense fallback={<div className="p-8 text-center font-bold">Loading Bookings Hub...</div>}>
         <BookingsHubContent />
       </Suspense>
     </DashboardLayout>
+  );
+}
+
+export default function BookingsPage() {
+  return (
+    <Suspense fallback={<div className="flex h-screen items-center justify-center">Loading...</div>}>
+      <BookingsPageInner />
+    </Suspense>
   );
 }

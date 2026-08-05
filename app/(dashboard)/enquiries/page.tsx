@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
 import { useFleetStore } from '@/lib/store/use-fleet-store';
@@ -34,7 +34,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 
-export default function EnquiriesPage() {
+function EnquiriesPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const editId = searchParams.get('edit');
@@ -614,5 +614,13 @@ export default function EnquiriesPage() {
         </Dialog>
       </div>
     </DashboardLayout>
+  );
+}
+
+export default function EnquiriesPage() {
+  return (
+    <Suspense fallback={<div className="flex h-screen items-center justify-center">Loading...</div>}>
+      <EnquiriesPageInner />
+    </Suspense>
   );
 }

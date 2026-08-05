@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
 import { useFleetStore } from '@/lib/store/use-fleet-store';
@@ -15,7 +15,7 @@ import { ReceiptPdfTemplate } from '@/components/pdf/receipt-template';
 import { formatCurrency } from '@/utils/formatters';
 import { ArrowLeft, Printer, Trash2, Save, Download } from 'lucide-react';
 
-export default function ReceiptEditorPage() {
+function ReceiptEditorPageInner() {
   const router = useRouter();
   const params = useParams();
   const searchParams = useSearchParams();
@@ -367,5 +367,13 @@ export default function ReceiptEditorPage() {
         </div>
       </div>
     </DashboardLayout>
+  );
+}
+
+export default function ReceiptEditorPage() {
+  return (
+    <Suspense fallback={<div className="flex h-screen items-center justify-center">Loading...</div>}>
+      <ReceiptEditorPageInner />
+    </Suspense>
   );
 }

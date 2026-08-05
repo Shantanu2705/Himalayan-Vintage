@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
 import { useFleetStore } from '@/lib/store/use-fleet-store';
@@ -13,7 +13,7 @@ import { formatCurrency, formatDate } from '@/utils/formatters';
 import { Search, Plus, FileText, Receipt as ReceiptIcon, FileClock } from 'lucide-react';
 import { Invoice, Receipt, Quotation, Booking } from '@/types';
 
-export default function BillingHubContent() {
+function BillingHubInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { invoices, receipts, quotations, bookings } = useFleetStore();
@@ -352,5 +352,13 @@ export default function BillingHubContent() {
         )}
       </div>
     </DashboardLayout>
+  );
+};
+
+export default function BillingHubContent() {
+  return (
+    <Suspense fallback={<div className="flex h-screen items-center justify-center">Loading...</div>}>
+      <BillingHubInner />
+    </Suspense>
   );
 }

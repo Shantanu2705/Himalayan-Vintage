@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
 import { useFleetStore } from '@/lib/store/use-fleet-store';
@@ -23,7 +23,7 @@ const INDIAN_STATES = [
   'Uttar Pradesh', 'Uttarakhand', 'West Bengal'
 ];
 
-export default function InvoiceEditorPage() {
+function InvoiceEditorPageInner() {
   const router = useRouter();
   const params = useParams();
   const searchParams = useSearchParams();
@@ -497,5 +497,13 @@ export default function InvoiceEditorPage() {
       </div>
       </div>
     </DashboardLayout>
+  );
+}
+
+export default function InvoiceEditorPage() {
+  return (
+    <Suspense fallback={<div className="flex h-screen items-center justify-center">Loading...</div>}>
+      <InvoiceEditorPageInner />
+    </Suspense>
   );
 }
