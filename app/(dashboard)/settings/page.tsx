@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { updateCredentials } from '@/lib/firebase/auth';
-import { Upload } from 'lucide-react';
+import { Upload, Trash2 } from 'lucide-react';
 
 function SettingsContent() {
   const { settings, updateSettings } = useFleetStore();
@@ -182,10 +182,17 @@ function SettingsContent() {
                 <div className="w-16 h-10 bg-gray-50 rounded flex items-center justify-center overflow-hidden">
                   {logoUrl ? <img src={logoUrl} className="w-full h-full object-contain" alt="logo" /> : <span className="text-[10px] text-gray-400">No logo</span>}
                 </div>
-                <Label className="text-[13px] text-gray-600 font-medium cursor-pointer hover:text-gray-900 transition-colors">
-                  Change logo
-                  <input type="file" className="hidden" accept="image/*" onChange={e => handleImageUpload(e, setLogoUrl)} />
-                </Label>
+                <div className="flex items-center gap-2">
+                  <Label className="text-[13px] text-gray-600 font-medium cursor-pointer hover:text-gray-900 transition-colors">
+                    Change logo
+                    <input type="file" className="hidden" accept="image/*" onChange={e => handleImageUpload(e, setLogoUrl)} />
+                  </Label>
+                  {logoUrl && (
+                    <Button onClick={() => setLogoUrl('')} variant="ghost" size="sm" className="h-7 w-7 p-0 rounded-full text-red-500 hover:text-red-600 hover:bg-red-50">
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -202,10 +209,17 @@ function SettingsContent() {
                 <div className="w-40 h-16 border border-dashed border-gray-300 rounded-xl flex items-center justify-center bg-gray-50/50 overflow-hidden">
                   {headerLogoUrl ? <img src={headerLogoUrl} className="w-full h-full object-contain" alt="header" /> : <span className="text-[11px] text-gray-400">Default</span>}
                 </div>
-                <Label className="h-9 px-4 rounded-full border border-gray-200 flex items-center justify-center gap-2 text-[12px] font-semibold text-gray-700 cursor-pointer hover:bg-gray-50">
-                  <Upload className="w-3.5 h-3.5" /> Upload
-                  <input type="file" className="hidden" accept="image/*" onChange={e => handleImageUpload(e, setHeaderLogoUrl)} />
-                </Label>
+                <div className="flex items-center gap-2">
+                  <Label className="h-9 px-4 rounded-full border border-gray-200 flex items-center justify-center gap-2 text-[12px] font-semibold text-gray-700 cursor-pointer hover:bg-gray-50">
+                    <Upload className="w-3.5 h-3.5" /> Upload
+                    <input type="file" className="hidden" accept="image/*" onChange={e => handleImageUpload(e, setHeaderLogoUrl)} />
+                  </Label>
+                  {headerLogoUrl && (
+                    <Button onClick={() => setHeaderLogoUrl('')} variant="outline" size="sm" className="h-9 w-9 p-0 rounded-full text-red-500 hover:text-red-600 hover:bg-red-50 border-gray-200">
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
             <div className="space-y-2">
@@ -214,10 +228,17 @@ function SettingsContent() {
                 <div className="w-40 h-16 border border-dashed border-gray-300 rounded-xl flex items-center justify-center bg-gray-50/50 overflow-hidden">
                   {footerLogoUrl ? <img src={footerLogoUrl} className="w-full h-full object-contain" alt="footer" /> : <span className="text-[11px] text-gray-400">Default</span>}
                 </div>
-                <Label className="h-9 px-4 rounded-full border border-gray-200 flex items-center justify-center gap-2 text-[12px] font-semibold text-gray-700 cursor-pointer hover:bg-gray-50">
-                  <Upload className="w-3.5 h-3.5" /> Upload
-                  <input type="file" className="hidden" accept="image/*" onChange={e => handleImageUpload(e, setFooterLogoUrl)} />
-                </Label>
+                <div className="flex items-center gap-2">
+                  <Label className="h-9 px-4 rounded-full border border-gray-200 flex items-center justify-center gap-2 text-[12px] font-semibold text-gray-700 cursor-pointer hover:bg-gray-50">
+                    <Upload className="w-3.5 h-3.5" /> Upload
+                    <input type="file" className="hidden" accept="image/*" onChange={e => handleImageUpload(e, setFooterLogoUrl)} />
+                  </Label>
+                  {footerLogoUrl && (
+                    <Button onClick={() => setFooterLogoUrl('')} variant="outline" size="sm" className="h-9 w-9 p-0 rounded-full text-red-500 hover:text-red-600 hover:bg-red-50 border-gray-200">
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
           </div>
