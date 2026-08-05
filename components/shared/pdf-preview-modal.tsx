@@ -32,6 +32,7 @@ export const PdfPreviewModal: React.FC<PdfPreviewModalProps> = ({
   const settings = useFleetStore((state) => state.settings);
 
   React.useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 
@@ -79,12 +80,13 @@ export const PdfPreviewModal: React.FC<PdfPreviewModalProps> = ({
       </Dialog>
 
       {mounted && isOpen && typeof document !== 'undefined' && createPortal(
-        <div id="global-print-area" className="hidden print:block print:w-full print:bg-white print:text-black print:absolute print:left-0 print:top-0 print:m-0 print:overflow-visible print:z-[99999] relative">
+        <div id="global-print-area" className="hidden print:block print:w-full print:bg-white print:text-black print:m-0 print:overflow-visible print:z-[99999] static">
           
           {/* Fixed overlay for border and watermark that repeats on every printed page */}
           <div className="hidden print:flex fixed inset-0 z-0 items-center justify-center pointer-events-none">
              {/* Border */}
-             <div className="absolute border-2 border-slate-700 pointer-events-none rounded-sm" style={{ top: '15px', bottom: '15px', left: '15px', right: '15px' }} />
+             <div className="absolute border-[3px] border-primary/30 pointer-events-none" style={{ top: '12px', bottom: '12px', left: '12px', right: '12px' }} />
+             <div className="absolute border border-primary/60 pointer-events-none" style={{ top: '17px', bottom: '17px', left: '17px', right: '17px' }} />
              
              {/* Watermark Logo */}
              {settings?.logoUrl && (
@@ -93,10 +95,9 @@ export const PdfPreviewModal: React.FC<PdfPreviewModalProps> = ({
                  alt="Watermark" 
                  className="pointer-events-none"
                  style={{ 
-                   maxWidth: '60%', 
-                   maxHeight: '60%', 
-                   opacity: 0.15,
-                   filter: 'grayscale(100%)', 
+                   maxWidth: '65%', 
+                   maxHeight: '65%', 
+                   opacity: 0.12,
                    mixBlendMode: 'multiply' 
                  }}
                />

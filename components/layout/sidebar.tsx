@@ -43,22 +43,27 @@ export const Sidebar: React.FC<{ className?: string; onCloseMobile?: () => void 
   return (
     <aside
       className={cn(
-        'flex h-full w-64 flex-col border-r bg-card text-card-foreground shadow-soft no-print',
+        'flex h-full w-64 flex-col border-r border-green-900 bg-green-900 text-white shadow-soft no-print',
         className
       )}
     >
       {/* Brand Header */}
-      <div className="flex h-16 items-center border-b px-6">
-        <Link href="/" className="flex items-center gap-3 font-bold text-lg tracking-tight overflow-hidden" onClick={onCloseMobile}>
+      <div className="flex flex-col items-center border-b border-green-800 bg-white px-6 py-6 shadow-sm z-10 relative">
+        <Link href="/" className="flex flex-col items-center text-center group w-full" onClick={onCloseMobile}>
           {settings?.logoUrl ? (
-            <img src={settings.logoUrl} alt="Company Logo" className="h-9 w-9 rounded-lg object-contain bg-white border p-0.5 shrink-0 shadow-xs" />
+            <div className="w-full flex items-center justify-center min-h-[72px] transition-transform group-hover:scale-105">
+              <img 
+                src={settings.logoUrl} 
+                alt="Company Logo" 
+                className="max-h-20 w-auto object-contain mix-blend-multiply" 
+              />
+            </div>
           ) : (
-            <img src="/logo-icon.svg" alt="Company Logo" className="h-10 w-10 shrink-0 object-contain" />
+            <img src="/logo-icon.svg" alt="Company Logo" className="h-14 w-14 shrink-0 object-contain transition-transform group-hover:scale-105 drop-shadow-sm" style={{ filter: "invert(0.8) sepia(1) hue-rotate(80deg) saturate(300%)" }} />
           )}
-          <div className="flex flex-col truncate">
-            <span className="leading-none text-primary truncate font-bold text-base">{settings?.companyName?.split(' ')[0] || 'Himalayan'}</span>
-            <span className="text-[10px] font-semibold tracking-widest text-muted-foreground uppercase mt-0.5 truncate">
-              {settings?.companyName?.split(' ').slice(1).join(' ') || 'Fleet Enterprise'}
+          <div className="flex flex-col mt-4">
+            <span className="leading-tight text-green-950 font-extrabold text-[15px] tracking-wide">
+              {settings?.companyName || 'Himalayan Vintage Holidays'}
             </span>
           </div>
         </Link>
@@ -66,7 +71,7 @@ export const Sidebar: React.FC<{ className?: string; onCloseMobile?: () => void 
 
       {/* Navigation Links */}
       <div className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
-        <div className="px-3 pb-2 text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">
+        <div className="px-3 pb-2 text-[11px] font-semibold tracking-wider text-green-200 uppercase">
           Core Modules
         </div>
         {navItems.map((item) => {
@@ -80,15 +85,15 @@ export const Sidebar: React.FC<{ className?: string; onCloseMobile?: () => void 
               className={cn(
                 'group flex items-center justify-between rounded-md px-3 py-2 text-sm font-medium transition-all duration-150',
                 isActive
-                  ? 'bg-primary text-primary-foreground shadow-sm'
-                  : 'text-muted-foreground hover:bg-muted/80 hover:text-foreground'
+                  ? 'bg-yellow-600 text-white shadow-sm'
+                  : 'text-green-50 hover:bg-yellow-200 hover:text-yellow-900'
               )}
             >
               <div className="flex items-center gap-3">
                 <Icon
                   className={cn(
                     'h-4 w-4 transition-colors',
-                    isActive ? 'text-primary-foreground' : 'text-muted-foreground group-hover:text-foreground'
+                    isActive ? 'text-white' : 'text-green-100 group-hover:text-yellow-900'
                   )}
                 />
                 <span>{item.title}</span>
@@ -100,14 +105,14 @@ export const Sidebar: React.FC<{ className?: string; onCloseMobile?: () => void 
       </div>
 
       {/* Footer User Info */}
-      <div className="border-t p-4 bg-muted/30">
+      <div className="border-t border-green-700 p-4 bg-black/10">
         <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/20 text-primary font-bold text-xs uppercase">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-white font-bold text-xs uppercase">
             {user?.name?.[0] || 'U'}
           </div>
           <div className="flex flex-col overflow-hidden">
-            <span className="truncate text-xs font-semibold text-foreground">{user?.name || 'Guest User'}</span>
-            <span className="truncate text-[10px] text-muted-foreground capitalize">{user?.role || 'operator'} Role</span>
+            <span className="truncate text-xs font-semibold text-white">{user?.name || 'Guest User'}</span>
+            <span className="truncate text-[10px] text-green-200 capitalize">{user?.role || 'operator'} Role</span>
           </div>
         </div>
       </div>

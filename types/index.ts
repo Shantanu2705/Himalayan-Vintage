@@ -239,10 +239,18 @@ export type ReceiptType = 'Confirmation cum Advance Receipt' | 'Advance Receipt'
 
 export interface InvoiceItem {
   id?: string;
-  description: string;
+  description?: string;
+  serviceDetails?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  vehicles?: string;
   sacCode?: string;
+  hsnSac?: string;
   quantity: number;
   rate: number;
+  discountPercent?: number;
+  gstPercent?: number;
+  taxableAmount?: number;
   amount?: number;
 }
 
@@ -256,21 +264,35 @@ export interface Invoice {
   clientMobile?: string;
   clientPhone?: string;
   clientAddress?: string;
+  billingAddress?: string;
+  clientState?: string;
+  supplyType?: string;
   clientGst?: string;
   clientGstin?: string;
+  paymentTerms?: string;
+  travellers?: string;
   date?: string;
   issueDate?: string;
   dueDate?: string;
   items: InvoiceItem[];
   subtotal: number;
-  gstPercent: number;
+  gstPercent?: number;
+  cgst?: number;
+  sgst?: number;
+  igst?: number;
   gstAmount: number;
+  roundOff?: number;
   totalAmount: number;
   paidAmount: number;
+  advanceReceived?: number;
   balanceAmount: number;
   status: PaymentStatus;
   notes?: string;
   terms?: string;
+  disclaimerNote?: string;
+  placeOfIssue?: string;
+  signatoryName?: string;
+  extraNote?: string;
 }
 
 export interface Receipt {
@@ -287,6 +309,34 @@ export interface Receipt {
   referenceNo?: string;
   receiptType?: ReceiptType;
   notes?: string;
+
+  // Extended Fields for Full-Page Builder
+  quotationNo?: string;
+  bookingReference?: string;
+  destination?: string;
+  travelStart?: string;
+  travelEnd?: string;
+  
+  grandTotal?: number;
+  advancePercent?: number;
+  advanceAmount?: number;
+  receivedAmount?: number;
+  paymentDate?: string;
+  receivedBy?: string;
+  remarks?: string;
+
+  receiptHeading?: string;
+  businessHouse?: string;
+  pax?: string;
+  packageType?: string;
+  vehicleDetails?: string;
+  duty?: string;
+  includes?: string;
+  costingOverride?: string;
+  advanceLineOverride?: string;
+  stayDetails?: string;
+  checkedByName?: string;
+  designation?: string;
 }
 
 export interface RouteMaster {
@@ -397,4 +447,8 @@ export interface CompanySettings {
   companyPan?: string;
   cancellationPolicy?: string;
   signatureUrl?: string;
+  headerLogoUrl?: string;
+  footerLogoUrl?: string;
+  adminFullName?: string;
+  adminEmail?: string;
 }

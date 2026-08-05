@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { StatusBadge } from '@/components/shared/status-badge';
 import { PdfPreviewModal } from '@/components/shared/pdf-preview-modal';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { formatCurrency, formatDate, formatPhoneNumber } from '@/utils/formatters';
 import {
   FileText,
@@ -120,116 +121,73 @@ export default function QuotationsListPage() {
         <Card className="shadow-soft overflow-hidden">
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead>Quotation # & Date</TableHead>
-                <TableHead>Client Information</TableHead>
-                <TableHead>Itinerary & Vehicle</TableHead>
-                <TableHead>Pricing Summary</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+              <TableRow className="border-b-gray-100">
+                <TableHead className="font-semibold text-gray-500">Quotation #</TableHead>
+                <TableHead className="font-semibold text-gray-500">Customer</TableHead>
+                <TableHead className="font-semibold text-gray-500">Destination</TableHead>
+                <TableHead className="font-semibold text-gray-500">Travel Date</TableHead>
+                <TableHead className="font-semibold text-gray-500">Type</TableHead>
+                <TableHead className="font-semibold text-gray-500">Status</TableHead>
+                <TableHead className="font-semibold text-gray-500 text-right">Total</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filtered.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
+                  <TableCell colSpan={7} className="h-32 text-center text-muted-foreground">
                     No quotations found. Click "Create Quotation" to build a new estimate!
                   </TableCell>
                 </TableRow>
               ) : (
                 filtered.map((q, idx) => (
-                  <TableRow key={q.id ? `${q.id}-${idx}` : `quote-${idx}`}>
-                    <TableCell className="font-semibold">
-                      <span className="font-mono text-primary text-xs bg-primary/10 px-2 py-0.5 rounded">
+                  <TableRow key={q.id ? `${q.id}-${idx}` : `quote-${idx}`} className="border-b-gray-50 hover:bg-gray-50/50">
+                    <TableCell className="font-bold text-gray-900">
+                      <div onClick={() => handleEdit(q)} className="cursor-pointer hover:text-primary hover:underline transition-colors">
                         {q.quotationNo}
-                      </span>
-                      <span className="block text-[10px] text-muted-foreground mt-1">
-                        {formatDate(q.createdAt)}
-                      </span>
-                      <span className="inline-block text-[9px] uppercase tracking-wider bg-muted px-1.5 py-0.2 mt-1 rounded font-bold text-muted-foreground">
-                        {q.type}
-                      </span>
+                      </div>
                     </TableCell>
                     <TableCell>
-                      <div className="font-bold text-foreground">{q.clientName}</div>
-                      {q.clientPhone && (
-                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-mono mt-0.5">
-                          <Phone className="h-3 w-3 text-primary" /> {formatPhoneNumber(q.clientPhone)}
+                      <div className="font-semibold text-gray-900">{q.clientName || q.customerName}</div>
+                      {(q.clientPhone || q.mobile) && (
+                        <div className="text-[11px] text-gray-500 font-medium mt-0.5">
+                          {q.clientPhone || q.mobile}
                         </div>
                       )}
-                      {q.clientEmail && (
-                        <div className="text-[11px] text-muted-foreground truncate max-w-[150px]">{q.clientEmail}</div>
-                      )}
+                    </TableCell>
+                    <TableCell className="text-gray-600 font-medium text-sm">
+                      {q.destination}
+                    </TableCell>
+                    <TableCell className="text-gray-600 font-medium text-sm">
+                      {formatDate(q.startDate)}
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-1 text-xs font-semibold text-foreground">
-                        <MapPin className="h-3.5 w-3.5 text-red-500 shrink-0" />
-                        <span>{q.pickupLocation} → {q.destination}</span>
-                      </div>
-                      <div className="mt-1 flex items-center gap-2">
-                        <span className="text-[10px] font-bold bg-muted px-2 py-0.5 rounded text-primary uppercase">
-                          {q.vehicle}
-                        </span>
-                        <span className="text-[10px] text-muted-foreground">{q.days} Days ({formatDate(q.startDate)})</span>
-                      </div>
+                      <span className="inline-flex items-center justify-center px-3 py-1 rounded-full text-[11px] font-bold bg-cyan-100 text-cyan-800 capitalize tracking-wide">
+                        {q.type || q.clientType || 'Tourist'}
+                      </span>
                     </TableCell>
                     <TableCell>
-                      <div className="text-sm font-extrabold text-foreground">{formatCurrency(q.totalAmount)}</div>
-                      <div className="text-[10px] text-muted-foreground">
-                        Base: {formatCurrency(q.baseAmount)} + GST (5%)
-                      </div>
+                      <Select 
+                        value={q.status || 'draft'} 
+                        onValueChange={(val) => updateQuotation({ ...q, status: val })}
+                      >
+                        <SelectTrigger className={`h-8 w-[100px] text-[11px] font-bold border-0 shadow-none focus:ring-0 rounded-full ${
+                          q.status === 'confirmed' ? 'bg-emerald-100 text-emerald-800' :
+                          q.status === 'sent' ? 'bg-blue-100 text-blue-800' :
+                          q.status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                          'bg-orange-100 text-orange-800'
+                        }`}>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="draft" className="text-xs font-bold text-orange-800">Draft</SelectItem>
+                          <SelectItem value="sent" className="text-xs font-bold text-blue-800">Sent</SelectItem>
+                          <SelectItem value="confirmed" className="text-xs font-bold text-emerald-800">Confirmed</SelectItem>
+                          <SelectItem value="cancelled" className="text-xs font-bold text-red-800">Cancelled</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </TableCell>
-                    <TableCell>
-                      <StatusBadge status={q.status} />
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-primary hover:bg-primary/10"
-                          onClick={() => setPreviewQuotation(q)}
-                          title="Print / Preview PDF"
-                        >
-                          <Printer className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="h-8 text-xs font-semibold text-emerald-700 border-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
-                          onClick={() => handleConvertToBooking(q)}
-                          title="Convert to Confirmed Booking"
-                        >
-                          <CalendarCheck className="mr-1 h-3.5 w-3.5" /> Book
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={() => handleDuplicate(q)}
-                          title="Duplicate Quotation"
-                        >
-                          <Copy className="h-3.5 w-3.5 text-muted-foreground" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/30 font-semibold"
-                          onClick={() => handleEdit(q)}
-                          title="Edit Quotation"
-                        >
-                          <Edit className="h-3.5 w-3.5 mr-1" /> Edit
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-destructive hover:bg-destructive/10"
-                          onClick={() => deleteQuotation(q.id)}
-                          title="Delete"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
+                    <TableCell className="font-extrabold text-gray-900 text-sm text-right">
+                      {formatCurrency(q.totalAmount || (q as any).grandTotal || 0)}
                     </TableCell>
                   </TableRow>
                 ))

@@ -53,7 +53,7 @@ function BookingsHubContent() {
   const [vehicle, setVehicle] = useState<VehicleType | string>('Innova Crysta');
   const [driverId, setDriverId] = useState<string>('');
   const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
-  const [endDate, setEndDate] = useState(new Date(Date.now() + 4 * 86400000).toISOString().split('T')[0]);
+  const [endDate, setEndDate] = useState(() => new Date(Date.now() + 4 * 86400000).toISOString().split('T')[0]);
   const [amount, setAmount] = useState(25000);
   const [advance, setAdvance] = useState(12500);
   const [status, setStatus] = useState<BookingStatus>('confirmed');
@@ -64,6 +64,7 @@ function BookingsHubContent() {
     if (fromQuotationId) {
       const q = quotations.find((item) => item.id === fromQuotationId);
       if (q) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setClientName(q.clientName || '');
         setMobile(q.clientPhone || q.mobile || '');
         setPickup(q.pickupLocation || '');

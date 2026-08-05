@@ -37,7 +37,7 @@ function DriversHubContent() {
   const [mobile, setMobile] = useState('');
   const [licenseNo, setLicenseNo] = useState('');
   const [badgeNo, setBadgeNo] = useState('');
-  const [expiryDate, setExpiryDate] = useState(new Date(Date.now() + 500 * 86400000).toISOString().split('T')[0]);
+  const [expiryDate, setExpiryDate] = useState(() => new Date(Date.now() + 500 * 86400000).toISOString().split('T')[0]);
   const [status, setStatus] = useState<'active' | 'on-leave' | 'inactive' | string>('active');
   const [avatarUrl, setAvatarUrl] = useState('');
 
@@ -60,7 +60,7 @@ function DriversHubContent() {
     setLicenseNo(d.licenseNo || d.license || '');
     setBadgeNo(d.badgeNo || '');
     setExpiryDate(d.licenseExpiry?.split('T')[0] || new Date().toISOString().split('T')[0]);
-    setStatus((d.status || 'active') as any);
+    setStatus((d.status || 'active') as string);
     setAvatarUrl(d.avatarUrl || '');
     setIsModalOpen(true);
   };
@@ -269,7 +269,7 @@ function DriversHubContent() {
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs font-semibold">Duty Status</Label>
-                <Select value={status} onValueChange={(s) => setStatus(s as any)}>
+                <Select value={status} onValueChange={(s) => setStatus(s as string)}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="active">Active (On Duty)</SelectItem>

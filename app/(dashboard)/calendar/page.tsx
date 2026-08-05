@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useFleetStore } from '@/lib/store/use-fleet-store';
 import { Booking, VehicleType, BookingStatus, ClientType } from '@/types';
 import { Button } from '@/components/ui/button';
@@ -8,37 +8,37 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ChevronLeft, ChevronRight, PlusCircle, Calendar as CalendarIcon, Trash2, Search } from 'lucide-react';
+import { ChevronLeft, ChevronRight, PlusCircle, Calendar as CalendarIcon, Trash2, Search, GripVertical } from 'lucide-react';
 import { cn } from '@/components/ui/button';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const DAYS_OF_WEEK = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
+const getLocalDateString = (d: Date) => {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 const LEGEND_ITEMS = [
-  { label: 'Confirmed', color: 'bg-green-500' },
-  { label: 'Pending', color: 'bg-yellow-500' },
-  { label: 'Cancelled', color: 'bg-red-500' },
+  { label: 'Confirmed', color: 'bg-emerald-500' },
+  { label: 'Pending', color: 'bg-amber-500' },
+  { label: 'Cancelled', color: 'bg-rose-500' },
   { label: 'Corporate', color: 'bg-slate-800' },
   { label: 'Tourist', color: 'bg-teal-500' },
 ];
 
 const getBookingColor = (b: Booking) => {
-  if (b.clientType === 'corporate') return 'bg-slate-800/10 text-slate-800 border-slate-800/20';
-  if (b.clientType === 'tourist') return 'bg-teal-500/10 text-teal-800 border-teal-500/20';
-  if (b.status === 'confirmed') return 'bg-green-100 text-green-800 border-green-200';
-  if (b.status === 'cancelled') return 'bg-red-100 text-red-800 border-red-200';
-  if (b.status === 'completed') return 'bg-blue-100 text-blue-800 border-blue-200';
-  return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-};
+  if (b.status === 'cancelled') return 'bg-rose-50 text-rose-700 border-rose-200';
+  if (b.status === 'pending') return 'bg-amber-50 text-amber-700 border-amber-200';
+  if (b.status === 'completed') return 'bg-blue-50 text-blue-700 border-blue-100';
 
-const getDotColor = (b: Booking) => {
-  if (b.clientType === 'corporate') return 'bg-slate-800';
-  if (b.clientType === 'tourist') return 'bg-teal-500';
-  if (b.status === 'confirmed') return 'bg-green-500';
-  if (b.status === 'cancelled') return 'bg-red-500';
-  if (b.status === 'completed') return 'bg-blue-500';
-  return 'bg-yellow-500';
+  if (b.clientType === 'corporate') return 'bg-slate-100 text-slate-700 border-slate-200';
+  if (b.clientType === 'tourist') return 'bg-cyan-50 text-cyan-700 border-cyan-100';
+  
+  return 'bg-emerald-50 text-emerald-700 border-emerald-100';
 };
 
 type ViewMode = 'day' | 'week' | 'month';
@@ -51,6 +51,59 @@ export default function CalendarPage() {
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBooking, setEditingBooking] = useState<Booking | null>(null);
+
+  // Auto load dummy data if calendar is empty
+  useEffect(() => {
+    if (bookings.length === 0) {
+      const generateDummyData = async () => {
+        const year = new Date().getFullYear();
+        const month = new Date().getMonth();
+        const dummyBookings: Array<Partial<Booking> & { dOff: number }> = [
+          { clientName: 'Kavya Sinha', vehicle: 'SUV', clientType: 'tourist', status: 'confirmed', dOff: -2 },
+          { clientName: 'Neha Gupta', vehicle: '27 Seater Bus', clientType: 'tourist', status: 'confirmed', dOff: -2 },
+          { clientName: 'Priya Das', vehicle: 'SUV', clientType: 'tourist', status: 'confirmed', dOff: -2 },
+          { clientName: 'Siddharth Khan', vehicle: '27 Seater Bus', clientType: 'tourist', status: 'confirmed', dOff: -1 },
+          { clientName: 'Meera Gupta', vehicle: 'SUV', clientType: 'tourist', status: 'confirmed', dOff: -1 },
+          { clientName: 'Manish Sinha', vehicle: 'Sedan', clientType: 'corporate', status: 'pending', dOff: 0 },
+          { clientName: 'Aarav Sinha', vehicle: 'Tempo Traveller', clientType: 'corporate', status: 'pending', dOff: 1 },
+          { clientName: 'Rahul Roy', vehicle: '27 Seater Bus', clientType: 'tourist', status: 'confirmed', dOff: 2 },
+          { clientName: 'Suresh Gupta', vehicle: 'Tempo Traveller', clientType: 'corporate', status: 'pending', dOff: 2 },
+          { clientName: 'Pooja Chatterjee', vehicle: 'Tempo Traveller', clientType: 'corporate', status: 'pending', dOff: 2 },
+          { clientName: 'Ankit Nair', vehicle: 'SUV', clientType: 'tourist', status: 'cancelled', dOff: 6 },
+          { clientName: 'Karan Bose', vehicle: 'Innova Crysta', clientType: 'corporate', status: 'confirmed', dOff: 6 },
+          { clientName: 'Ananya Kapoor', vehicle: '22 Seater Bus', clientType: 'corporate', status: 'confirmed', dOff: 11 },
+          { clientName: 'Siddharth Rao', vehicle: '22 Seater Bus', clientType: 'tourist', status: 'confirmed', dOff: 11 },
+          { clientName: 'Suresh Menon', vehicle: 'Sedan', clientType: 'corporate', status: 'pending', dOff: 11 },
+          { clientName: 'Kavya Bose', vehicle: 'Innova Crysta', clientType: 'tourist', status: 'cancelled', dOff: 18 },
+          { clientName: 'Aditya Das', vehicle: 'Innova Crysta', clientType: 'corporate', status: 'confirmed', dOff: 18 },
+          { clientName: 'Rahul Verma', vehicle: '27 Seater Bus', clientType: 'tourist', status: 'cancelled', dOff: 21 },
+          { clientName: 'Rohan Iyer', vehicle: '22 Seater Bus', clientType: 'tourist', status: 'confirmed', dOff: 21 },
+          { clientName: 'Siddharth Kapoor', vehicle: 'Sedan', clientType: 'corporate', status: 'pending', dOff: 25 },
+        ];
+
+        for (let i = 0; i < dummyBookings.length; i++) {
+          const b = dummyBookings[i];
+          const d = new Date(year, month, new Date().getDate() + (b.dOff as number));
+          await addBooking({
+            id: `dummy-${i}-${Math.random().toString(36).substr(2, 9)}`,
+            bookingNo: `BKG-${1000 + i}`,
+            clientName: b.clientName!,
+            clientType: b.clientType!,
+            vehicle: b.vehicle!,
+            pickup: 'City Center',
+            destination: 'Airport',
+            startDate: d.toISOString(),
+            endDate: d.toISOString(),
+            amount: 5000,
+            status: b.status as BookingStatus,
+            advance: 0,
+            createdAt: new Date().toISOString(),
+          });
+        }
+      };
+      generateDummyData();
+    }
+  }, [bookings.length, addBooking]);
 
   // Form states
   const [clientName, setClientName] = useState('');
@@ -130,7 +183,7 @@ export default function CalendarPage() {
     setVehicle('');
     setPickup('');
     setDestination('');
-    const today = new Date().toISOString().split('T')[0];
+    const today = getLocalDateString(new Date());
     setStartDate(dateStr || today);
     setEndDate(dateStr || today);
     setAmount(0);
@@ -200,8 +253,8 @@ export default function CalendarPage() {
 
   // Rendering logic for cells
   const renderCell = (date: Date, isMonthView: boolean = true) => {
-    const dateStr = date.toISOString().split('T')[0];
-    const isToday = dateStr === new Date().toISOString().split('T')[0];
+    const dateStr = getLocalDateString(date);
+    const isToday = dateStr === getLocalDateString(new Date());
     
     const dayBookings = filteredBookings.filter(b => {
       if (!b.startDate) return false;
@@ -219,27 +272,34 @@ export default function CalendarPage() {
           isMonthView ? "min-h-[120px]" : "min-h-[300px]"
         )}
       >
-        <div className="flex justify-between items-start mb-2">
+        <div className="flex justify-between items-center mb-1">
           <span className={cn(
-            "text-sm font-medium h-7 w-7 flex items-center justify-center rounded-full",
-            isToday ? "bg-primary text-primary-foreground" : "text-muted-foreground group-hover:text-foreground"
+            "text-xs font-semibold px-1 rounded-sm",
+            isToday ? "bg-primary text-primary-foreground" : "text-slate-500"
           )}>
             {date.getDate()}
           </span>
-          <div 
-            className="p-1.5 rounded-full hover:bg-primary/20 opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
-            onClick={(e) => {
-              e.stopPropagation();
-              openNewModal(dateStr);
-            }}
-            title="Add booking"
-          >
-            <PlusCircle className="h-4 w-4 text-primary" />
+          <div className="flex items-center gap-1">
+            {dayBookings.length > 3 && (
+              <span className="text-[10px] font-medium text-slate-400">
+                +{dayBookings.length - 3}
+              </span>
+            )}
+            <div 
+              className="p-1 rounded hover:bg-primary/10 opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
+              onClick={(e) => {
+                e.stopPropagation();
+                openNewModal(dateStr);
+              }}
+              title="Add booking"
+            >
+              <PlusCircle className="h-3 w-3 text-primary" />
+            </div>
           </div>
         </div>
         
-        <div className="flex-1 overflow-y-auto space-y-1.5 pr-1 custom-scrollbar">
-          {dayBookings.map(b => (
+        <div className="flex flex-col gap-[2px]">
+          {dayBookings.slice(0, 3).map(b => (
             <div
               key={b.id}
               onClick={(e) => {
@@ -247,17 +307,13 @@ export default function CalendarPage() {
                 openEditModal(b);
               }}
               className={cn(
-                "p-2 rounded-md border shadow-xs cursor-pointer hover:brightness-95 transition-all text-xs",
+                "flex items-center gap-1.5 px-1.5 py-[3px] rounded-sm border cursor-pointer hover:brightness-95 transition-all text-[10px] font-medium truncate",
                 getBookingColor(b)
               )}
-              title={`${b.clientName} - ${b.vehicle}`}
+              title={`${b.clientName} - ${b.vehicle}${b.destination ? ` to ${b.destination}` : ''}`}
             >
-              <div className="flex items-center gap-1.5 mb-1">
-                <span className={cn("h-2 w-2 rounded-full shrink-0", getDotColor(b))} />
-                <span className="font-semibold truncate">{b.clientName}</span>
-              </div>
-              <div className="truncate opacity-80 text-[10px] pl-3">{b.vehicle}</div>
-              {b.destination && <div className="truncate opacity-70 text-[10px] pl-3">{b.destination}</div>}
+              <GripVertical className="h-3 w-3 opacity-40 shrink-0" />
+              <span className="truncate">{b.clientName} · {b.vehicle}</span>
             </div>
           ))}
         </div>
@@ -315,7 +371,7 @@ export default function CalendarPage() {
               <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{DAYS_OF_WEEK[d.getDay()]}</span>
               <span className={cn(
                 "text-sm font-bold h-7 w-7 flex items-center justify-center rounded-full",
-                d.toISOString().split('T')[0] === new Date().toISOString().split('T')[0] 
+                getLocalDateString(d) === getLocalDateString(new Date()) 
                   ? "bg-primary text-primary-foreground" 
                   : "text-foreground"
               )}>
@@ -340,7 +396,7 @@ export default function CalendarPage() {
           </span>
           <span className={cn(
             "text-xl font-bold h-10 w-10 mx-auto flex items-center justify-center rounded-full",
-            currentDate.toISOString().split('T')[0] === new Date().toISOString().split('T')[0] 
+            getLocalDateString(currentDate) === getLocalDateString(new Date()) 
               ? "bg-primary text-primary-foreground" 
               : "text-foreground"
           )}>
@@ -403,11 +459,11 @@ export default function CalendarPage() {
         </div>
 
         {/* Legend Row */}
-        <div className="flex flex-wrap items-center gap-4 px-2 pb-2">
+        <div className="flex flex-wrap items-center gap-6 px-5 py-3 bg-teal-50/50 rounded-lg mb-4">
           {LEGEND_ITEMS.map((item) => (
-            <div key={item.label} className="flex items-center gap-1.5">
-              <span className={cn("h-2.5 w-2.5 rounded-full", item.color)} />
-              <span className="text-xs font-medium text-muted-foreground">{item.label}</span>
+            <div key={item.label} className="flex items-center gap-2">
+              <span className={cn("h-3 w-3 rounded-full", item.color)} />
+              <span className="text-[13px] font-medium text-teal-800">{item.label}</span>
             </div>
           ))}
         </div>

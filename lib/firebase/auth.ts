@@ -100,3 +100,34 @@ export const getStoredSession = (): User | null => {
   // Default to null if not logged in
   return null;
 };
+
+export const updateCredentials = async (email: string, currentPass: string, newPass?: string): Promise<void> => {
+  if (isRealFirebaseAuth() && auth?.currentUser) {
+    const { updateEmail, updatePassword, EmailAuthProvider, reauthenticateWithCredential } = await import('firebase/auth');
+    try {
+      const credential = EmailAuthProvider.credential(auth.currentUser.email || '', currentPass);
+      await reauthenticateWithCredential(auth.currentUser, credential);
+      
+      if (email && email !== auth.currentUser.email) {
+        await updateEmail(auth.currentUser, email);
+      }
+      
+      if (newPass) {
+        await updatePassword(auth.currentUser, newPass);
+      }
+      
+      const session = getStoredSession();
+      if (session && typeof window !== 'undefined') {
+        window.localStorage.setItem('hfm-auth-session', JSON.stringify({ ...session, email }));
+      }
+    } catch (error: any) {
+      throw new Error(error.message || 'Failed to update credentials. Please verify your current password.');
+    }
+  } else {
+    // Mock update for demo users
+    const session = getStoredSession();
+    if (session && typeof window !== 'undefined') {
+      window.localStorage.setItem('hfm-auth-session', JSON.stringify({ ...session, email }));
+    }
+  }
+};
