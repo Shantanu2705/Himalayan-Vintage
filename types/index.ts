@@ -83,7 +83,7 @@ export interface CorporateClient {
   createdAt?: string;
 }
 
-export type ClientType = 'tourist' | 'corporate' | string;
+export type ClientType = 'tourist' | 'corporate' | 'b2b' | string;
 export type EnquiryType = ClientType;
 export type QuotationType = ClientType;
 export type EnquiryStatus = 'new' | 'follow-up' | 'quotation-sent' | 'confirmed' | 'cancelled' | string;

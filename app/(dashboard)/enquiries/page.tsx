@@ -16,23 +16,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { StatusBadge } from '@/components/shared/status-badge';
 import { cn } from '@/components/ui/button';
 import { formatDate, formatPhoneNumber } from '@/utils/formatters';
-import {
-  MessageSquareQuote,
-  PlusCircle,
-  Search,
-  Filter,
-  ArrowRight,
-  FileText,
-  CalendarCheck,
-  Trash2,
-  Edit,
-  Phone,
-  Mail,
-  MapPin,
-  Truck,
-  Palmtree,
-  Sparkles,
-} from 'lucide-react';
+import { PlusCircle, Search, Edit2, Trash2, Phone, Calendar as CalendarIcon, MapPin, CheckCircle2, ChevronRight, X, User, AlertCircle, FileText, ArrowRight, Save, Clock, Copy, Download, Building2, Globe, Ticket, Hotel, Map, Quote, Check, FileCheck, Send, Archive, RotateCcw, CopyPlus, MessageCircle, MoreHorizontal, FileCheck2, Sparkles, Truck, Palmtree, Briefcase, Filter } from 'lucide-react';
 
 function EnquiriesPageInner() {
   const router = useRouter();
@@ -47,7 +31,7 @@ function EnquiriesPageInner() {
 
   // Form states
   const [formType, setFormType] = useState<EnquiryType | string>('tourist');
-  const [enquiryPrefix, setEnquiryPrefix] = useState<'TR' | 'PKG'>('TR');
+  const [enquiryPrefix, setEnquiryPrefix] = useState<'TR' | 'PKG' | 'B2B'>('TR');
   const [customerName, setCustomerName] = useState('');
   const [mobile, setMobile] = useState('');
   const [email, setEmail] = useState('');
@@ -72,17 +56,17 @@ function EnquiriesPageInner() {
     setIsTypeSelectorOpen(true);
   };
 
-  const handleTypeSelect = (type: 'transport' | 'package') => {
+  const handleTypeSelect = (type: 'transport' | 'package' | 'b2b') => {
     setIsTypeSelectorOpen(false);
     
     setEditingEnquiry(null);
-    setEnquiryPrefix(type === 'package' ? 'PKG' : 'TR');
-    setFormType(type === 'package' ? 'tourist' : 'corporate');
+    setEnquiryPrefix(type === 'package' ? 'PKG' : type === 'b2b' ? 'B2B' : 'TR');
+    setFormType(type === 'package' ? 'tourist' : type === 'b2b' ? 'b2b' : 'corporate');
     setCustomerName('');
     setMobile('');
     setEmail('');
-    setPickupLocation('Bagdogra Airport (IXB)');
-    setDestination(type === 'package' ? 'Gangtok & Darjeeling 5N/6D' : 'Gangtok');
+    setPickupLocation(type === 'b2b' ? 'NJP / Bagdogra' : 'Bagdogra Airport (IXB)');
+    setDestination(type === 'package' ? 'Gangtok & Darjeeling 5N/6D' : type === 'b2b' ? 'Multiple Destinations' : 'Gangtok');
     setVehicle('Innova Crysta');
     setStartDate(new Date().toISOString().split('T')[0]);
     setEndDate(new Date().toISOString().split('T')[0]);
@@ -167,7 +151,7 @@ function EnquiriesPageInner() {
       });
     } else {
       const newId = `enq-${Date.now()}`;
-      const typeEnquiries = enquiries.filter(e => (e.type === 'tourist' ? 'PKG' : 'TR') === enquiryPrefix);
+      const typeEnquiries = enquiries.filter(e => (e.type === 'tourist' ? 'PKG' : e.type === 'b2b' ? 'B2B' : 'TR') === enquiryPrefix);
       const nextNum = typeEnquiries.length + 1;
       
       await addEnquiry({
@@ -216,8 +200,8 @@ function EnquiriesPageInner() {
 
   const getFallbackEnquiryNo = (e: Enquiry) => {
     if (e.enquiryNo) return e.enquiryNo;
-    const pfx = e.type === 'tourist' ? 'PKG' : 'TR';
-    const typeEnquiries = enquiries.filter(eq => (eq.type === 'tourist' ? 'PKG' : 'TR') === pfx);
+    const pfx = e.type === 'tourist' ? 'PKG' : e.type === 'b2b' ? 'B2B' : 'TR';
+    const typeEnquiries = enquiries.filter(eq => (eq.type === 'tourist' ? 'PKG' : eq.type === 'b2b' ? 'B2B' : 'TR') === pfx);
     const idx = typeEnquiries.findIndex(eq => eq.id === e.id);
     const year = new Date(e.createdAt || Date.now()).getFullYear();
     return `${pfx}-${year}-${String(idx + 1).padStart(4, '0')}`;
@@ -396,14 +380,14 @@ function EnquiriesPageInner() {
 
         {/* Enquiry Type Selector Modal */}
         <Dialog open={isTypeSelectorOpen} onOpenChange={setIsTypeSelectorOpen}>
-          <DialogContent className="sm:max-w-[550px] p-8 bg-[#f0fdf4] border-0 shadow-lg rounded-[24px]">
+          <DialogContent className="sm:max-w-[850px] p-8 bg-[#f0fdf4] border-0 shadow-lg rounded-[24px]">
             <DialogHeader className="mb-4">
               <DialogTitle className="text-[22px] font-bold text-[#064e3b]">Choose enquiry type</DialogTitle>
               <DialogDescription className="text-[15px] text-gray-500 mt-1 font-medium">
                 A serial number is generated automatically after you save.
               </DialogDescription>
             </DialogHeader>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-2">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mt-2">
               <button 
                 onClick={() => handleTypeSelect('transport')}
                 className="flex flex-col items-start p-6 text-left border border-gray-200/60 rounded-[20px] bg-transparent hover:bg-white hover:border-gray-200 hover:shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#064e3b]/20"
@@ -423,6 +407,17 @@ function EnquiriesPageInner() {
                 <h3 className="font-bold text-[#064e3b] text-[17px] mb-2 tracking-tight">Tour package enquiry</h3>
                 <p className="text-[14px] text-gray-500 leading-relaxed font-medium">
                   Multi-day itinerary with sightseeing. Serial PKG-YYYY-####
+                </p>
+              </button>
+
+              <button 
+                onClick={() => handleTypeSelect('b2b')}
+                className="flex flex-col items-start p-6 text-left border border-gray-200/60 rounded-[20px] bg-transparent hover:bg-white hover:border-gray-200 hover:shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#064e3b]/20"
+              >
+                <Briefcase className="h-[26px] w-[26px] text-yellow-500 mb-4 stroke-[1.5]" />
+                <h3 className="font-bold text-[#064e3b] text-[17px] mb-2 tracking-tight">B2B enquiry</h3>
+                <p className="text-[14px] text-gray-500 leading-relaxed font-medium">
+                  Business to business bookings and agency rates. Serial B2B-YYYY-####
                 </p>
               </button>
             </div>
