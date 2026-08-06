@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeft, Trash2, Plus, Download, Printer, Mail, MessageCircle, Settings, Check, X, ChevronDown } from 'lucide-react';
 import { PdfPreviewModal } from '@/components/shared/pdf-preview-modal';
 import { QuotationPdfTemplate } from '@/components/pdf/quotation-template';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface VehicleEntry {
   id: string;
@@ -89,6 +90,7 @@ function SmartQuotationBuilderForm() {
   const [vehicleNotes, setVehicleNotes] = useState('');
   const [additionalNotes, setAdditionalNotes] = useState('');
   const [remarks, setRemarks] = useState('');
+  const [hasGst, setHasGst] = useState(true);
   useEffect(() => {
     if (enquiryId) {
       const enq = enquiries.find(e => e.id === enquiryId);
@@ -152,6 +154,7 @@ function SmartQuotationBuilderForm() {
         setVehicleNotes(quote.vehicleNotes || '');
         setAdditionalNotes(quote.additionalNotes || '');
         setRemarks(quote.remarks || '');
+        if (quote.hasGst !== undefined) setHasGst(quote.hasGst);
       }
     }
   }, [enquiryId, editId, enquiries, quotations]);
@@ -192,6 +195,7 @@ function SmartQuotationBuilderForm() {
       totalAmount: grandTotal,
       grandTotal: grandTotal,
       gstAmount: gstAmount,
+      hasGst: hasGst,
     };
 
     if (editId) {
@@ -215,7 +219,7 @@ function SmartQuotationBuilderForm() {
   const parking = Number(rateCard?.parking) || 0;
   const additional = Number(rateCard?.additional) || 0;
   const driverAllowance = Number(rateCard?.driverAllowance) || 0;
-  const gst = Number(rateCard?.gst) || 0;
+  const gst = hasGst ? (Number(rateCard?.gst) || 0) : 0;
   const advPct = Number(advancePercent) || 0;
 
   const packagePrice = Number(rateCard?.packagePrice) || 0;
@@ -308,6 +312,7 @@ function SmartQuotationBuilderForm() {
                 gstAmount: gstAmount,
                 grandTotal: grandTotal,
                 advancePercent: advancePercent,
+                hasGst: hasGst,
                 rateCard,
                 inclusions,
                 exclusions,
@@ -325,9 +330,14 @@ function SmartQuotationBuilderForm() {
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h2 className="text-[17px] font-bold text-[#1e293b]">Customer & tour</h2>
-                <p className="text-[12px] text-gray-500 font-medium">Quotation HVH/2026/5366 - Package</p>
+                <p className="text-[12px] text-gray-500 font-medium">Quotation {editId ? `Ref: ${editId.substring(0,8).toUpperCase()}` : 'NEW'}</p>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 bg-yellow-50 px-3 py-1.5 rounded-full border border-yellow-200 shadow-sm">
+                  <Checkbox id="hasGstTop" checked={hasGst} onCheckedChange={(c) => setHasGst(!!c)} className="border-yellow-500 data-[state=checked]:bg-yellow-500 data-[state=checked]:text-yellow-950" />
+                  <Label htmlFor="hasGstTop" className="text-[12px] font-bold text-yellow-900 cursor-pointer">GST Applicable</Label>
+                </div>
+                <div className="flex items-center gap-2">
                 <span className={`text-[11px] font-bold px-3 py-1 rounded-full border transition-colors
                   ${status === 'Draft' ? 'text-orange-500 bg-orange-50 border-orange-100' :
                     status === 'Sent' ? 'text-blue-500 bg-blue-50 border-blue-100' :
@@ -356,8 +366,9 @@ function SmartQuotationBuilderForm() {
                 </Select>
               </div>
             </div>
+          </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="space-y-1.5">
                 <Label className="text-[12px] font-bold text-gray-700">Type</Label>
                 <Select value={qType} onValueChange={setQType}>
@@ -774,10 +785,14 @@ function SmartQuotationBuilderForm() {
                   <span>Subtotal</span>
                   <span>₹{subtotal.toFixed(0)}</span>
                 </div>
-                <div className="flex justify-between text-[14px] text-gray-500 font-medium border-b border-gray-100 pb-5">
-                  <span>GST @ {gst}%</span>
-                  <span className="text-gray-900 font-bold">₹{gstAmount.toFixed(0)}</span>
-                </div>
+                {hasGst ? (
+                  <div className="flex justify-between text-[14px] text-gray-500 font-medium border-b border-gray-100 pb-5">
+                    <span>GST @ {rateCard?.gst || 0}%</span>
+                    <span className="text-gray-900 font-bold">₹{gstAmount.toFixed(0)}</span>
+                  </div>
+                ) : (
+                  <div className="border-b border-gray-100 pb-5"></div>
+                )}
                 
                 <div className="flex justify-between text-[18px] font-bold text-[#1e293b]">
                   <span>Grand total</span>

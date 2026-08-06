@@ -119,7 +119,7 @@ export const QuotationPdfTemplate: React.FC<QuotationPdfTemplateProps> = ({ quot
                 <td className="p-2 font-medium text-slate-600">Base Subtotal</td>
                 <td className="p-2 text-right font-mono">{formatCurrency(quotation.baseAmount)}</td>
               </tr>
-              {quotation.rateCard?.gst > 0 && (
+              {quotation.hasGst !== false && quotation.rateCard?.gst > 0 && (
                 <tr>
                   <td className="p-2 font-medium text-slate-600">GST ({quotation.rateCard.gst}%)</td>
                   <td className="p-2 text-right font-mono">{formatCurrency(quotation.gstAmount)}</td>

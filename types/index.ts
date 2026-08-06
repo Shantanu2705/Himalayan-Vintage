@@ -205,6 +205,7 @@ export interface Quotation {
   gstAmount: number;
   additionalCharges?: number;
   totalAmount: number;
+  hasGst?: boolean;
   createdAt?: string;
   status: QuotationStatus;
   inclusions?: string[];
@@ -283,6 +284,7 @@ export interface Invoice {
   gstAmount: number;
   roundOff?: number;
   totalAmount: number;
+  hasGst?: boolean;
   paidAmount: number;
   advanceReceived?: number;
   balanceAmount: number;

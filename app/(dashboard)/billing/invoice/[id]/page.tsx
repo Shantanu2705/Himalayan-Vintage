@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { PdfPreviewModal } from '@/components/shared/pdf-preview-modal';
 import { InvoicePdfTemplate } from '@/components/pdf/invoice-template';
 import { formatCurrency } from '@/utils/formatters';
@@ -40,6 +41,7 @@ function InvoiceEditorPageInner() {
 
   const [invoice, setInvoice] = useState<Partial<Invoice>>({
     invoiceNo: defaultInvoiceNo,
+    hasGst: true,
     status: 'unpaid',
     date: new Date().toISOString().split('T')[0],
     dueDate: new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0],
@@ -156,12 +158,14 @@ function InvoiceEditorPageInner() {
   const items = invoice.items || [];
   let taxable = 0;
   let totalGst = 0;
+  
+  const applyGst = invoice.hasGst !== false;
 
   items.forEach(item => {
     const qty = Number(item.quantity) || 0;
     const rate = Number(item.rate) || 0;
     const discount = Number(item.discountPercent) || 0;
-    const gstPercent = Number(item.gstPercent) || 0;
+    const gstPercent = applyGst ? (Number(item.gstPercent) || 0) : 0;
     
     const lineBase = qty * rate;
     const lineTaxable = lineBase - (lineBase * (discount / 100));
@@ -254,7 +258,13 @@ function InvoiceEditorPageInner() {
             
             {/* Invoice Details */}
             <Card className="p-6 border-0 shadow-sm rounded-2xl bg-white space-y-5">
-              <h2 className="text-[13px] font-bold text-gray-800">Invoice details</h2>
+              <div className="flex items-center justify-between">
+                <h2 className="text-[13px] font-bold text-gray-800">Invoice details</h2>
+                <div className="flex items-center gap-2 bg-yellow-50 px-3 py-1.5 rounded-full border border-yellow-200 shadow-sm">
+                  <Checkbox id="hasGstTop" checked={applyGst} onCheckedChange={(c) => handleUpdate('hasGst', !!c)} className="border-yellow-500 data-[state=checked]:bg-yellow-500 data-[state=checked]:text-yellow-950" />
+                  <Label htmlFor="hasGstTop" className="text-[12px] font-bold text-yellow-900 cursor-pointer">GST Applicable</Label>
+                </div>
+              </div>
               <div className="grid grid-cols-2 gap-5">
                 <div className="space-y-1.5">
                   <Label className="text-[12px] text-gray-500 font-medium">Invoice number</Label>
@@ -395,10 +405,12 @@ function InvoiceEditorPageInner() {
                         <Label className="text-[11px] text-gray-500">Discount %</Label>
                         <Input type="number" value={item.discountPercent || ''} onChange={e => handleLineUpdate(idx, 'discountPercent', Number(e.target.value))} className="h-9 rounded-lg bg-white border-gray-200 text-[13px]" />
                       </div>
-                      <div className="space-y-1.5">
-                        <Label className="text-[11px] text-gray-500">GST %</Label>
-                        <Input type="number" value={item.gstPercent || ''} onChange={e => handleLineUpdate(idx, 'gstPercent', Number(e.target.value))} className="h-9 rounded-lg bg-white border-gray-200 text-[13px]" />
-                      </div>
+                      {applyGst && (
+                        <div className="space-y-1.5">
+                          <Label className="text-[11px] text-gray-500">GST %</Label>
+                          <Input type="number" value={item.gstPercent || ''} onChange={e => handleLineUpdate(idx, 'gstPercent', Number(e.target.value))} className="h-9 rounded-lg bg-white border-gray-200 text-[13px]" />
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -442,14 +454,14 @@ function InvoiceEditorPageInner() {
           <div className="w-full lg:w-80 shrink-0">
             <div className="sticky top-6">
               <Card className="p-6 border-0 shadow-sm rounded-2xl bg-white space-y-4">
-                <h2 className="text-[14px] font-bold text-gray-900 pb-2 border-b border-gray-100">GST summary</h2>
+                <h2 className="text-[14px] font-bold text-gray-900 pb-2 border-b border-gray-100">{applyGst ? 'GST summary' : 'Summary'}</h2>
                 
                 <div className="space-y-3 pt-1">
                   <div className="flex justify-between items-center text-[13px] text-gray-600">
-                    <span>Taxable</span>
+                    <span>{applyGst ? 'Taxable' : 'Amount'}</span>
                     <span className="font-semibold text-gray-900">{formatCurrency(taxable)}</span>
                   </div>
-                  {isIntra ? (
+                  {applyGst && isIntra && (
                     <>
                       <div className="flex justify-between items-center text-[13px] text-gray-600">
                         <span>CGST</span>
@@ -460,7 +472,8 @@ function InvoiceEditorPageInner() {
                         <span className="font-semibold text-gray-900">{formatCurrency(sgst)}</span>
                       </div>
                     </>
-                  ) : (
+                  )}
+                  {applyGst && !isIntra && (
                     <div className="flex justify-between items-center text-[13px] text-gray-600">
                       <span>IGST</span>
                       <span className="font-semibold text-gray-900">{formatCurrency(igst)}</span>

@@ -9,6 +9,7 @@ interface InvoicePdfTemplateProps {
 
 export const InvoicePdfTemplate: React.FC<InvoicePdfTemplateProps> = ({ invoice, settings }) => {
   const isIntra = invoice.supplyType?.includes('Intra-State');
+  const applyGst = invoice.hasGst !== false;
   
   const taxableAmount = invoice.items?.reduce((sum: number, item: any) => {
     const raw = (Number(item.rate) || 0) * (Number(item.quantity) || 0);
@@ -19,7 +20,7 @@ export const InvoicePdfTemplate: React.FC<InvoicePdfTemplateProps> = ({ invoice,
   const totalGst = invoice.items?.reduce((sum: number, item: any) => {
     const raw = (Number(item.rate) || 0) * (Number(item.quantity) || 0);
     const disc = raw * ((Number(item.discountPercent) || 0) / 100);
-    const itemTax = (raw - disc) * ((Number(item.gstPercent) || 0) / 100);
+    const itemTax = (raw - disc) * (applyGst ? ((Number(item.gstPercent) || 0) / 100) : 0);
     return sum + itemTax;
   }, 0) || 0;
 
@@ -118,8 +119,8 @@ export const InvoicePdfTemplate: React.FC<InvoicePdfTemplateProps> = ({ invoice,
               <th className="p-3 border-r border-b border-slate-300 text-right">Qty</th>
               <th className="p-3 border-r border-b border-slate-300 text-right">Rate</th>
               <th className="p-3 border-r border-b border-slate-300 text-right">Disc. %</th>
-              <th className="p-3 border-r border-b border-slate-300 text-right">Taxable</th>
-              <th className="p-3 border-r border-b border-slate-300 text-right">GST %</th>
+              <th className="p-3 border-r border-b border-slate-300 text-right">{applyGst ? 'Taxable' : 'Amount'}</th>
+              {applyGst && <th className="p-3 border-r border-b border-slate-300 text-right">GST %</th>}
               <th className="p-3 border-b border-slate-300 text-right font-bold">Total</th>
             </tr>
           </thead>
@@ -128,7 +129,7 @@ export const InvoicePdfTemplate: React.FC<InvoicePdfTemplateProps> = ({ invoice,
               const raw = (Number(item.rate) || 0) * (Number(item.quantity) || 0);
               const disc = raw * ((Number(item.discountPercent) || 0) / 100);
               const tax = raw - disc;
-              const gstAmt = tax * ((Number(item.gstPercent) || 0) / 100);
+              const gstAmt = tax * (applyGst ? ((Number(item.gstPercent) || 0) / 100) : 0);
               const total = tax + gstAmt;
 
               return (
@@ -150,7 +151,7 @@ export const InvoicePdfTemplate: React.FC<InvoicePdfTemplateProps> = ({ invoice,
                   <td className="p-3 border-r border-slate-300 text-right">{formatCurrency(Number(item.rate))}</td>
                   <td className="p-3 border-r border-slate-300 text-right">{item.discountPercent ? `${item.discountPercent}%` : '-'}</td>
                   <td className="p-3 border-r border-slate-300 text-right font-mono">{formatCurrency(tax)}</td>
-                  <td className="p-3 border-r border-slate-300 text-right text-slate-600">{item.gstPercent ? `${item.gstPercent}%` : 'EXEMPT'}</td>
+                  {applyGst && <td className="p-3 border-r border-slate-300 text-right text-slate-600">{item.gstPercent ? `${item.gstPercent}%` : 'EXEMPT'}</td>}
                   <td className="p-3 text-right font-bold font-mono">{formatCurrency(total)}</td>
                 </tr>
               );
@@ -182,10 +183,10 @@ export const InvoicePdfTemplate: React.FC<InvoicePdfTemplateProps> = ({ invoice,
           <table className="w-full text-xs">
             <tbody className="divide-y divide-slate-100">
               <tr>
-                <td className="py-2 text-slate-600 font-semibold">Total Taxable Value</td>
+                <td className="py-2 text-slate-600 font-semibold">{applyGst ? 'Total Taxable Value' : 'Subtotal'}</td>
                 <td className="py-2 text-right font-mono font-bold text-slate-900">{formatCurrency(taxableAmount)}</td>
               </tr>
-              {isIntra ? (
+              {applyGst && isIntra && (
                 <>
                   <tr>
                     <td className="py-2 text-slate-600">CGST</td>
@@ -196,7 +197,8 @@ export const InvoicePdfTemplate: React.FC<InvoicePdfTemplateProps> = ({ invoice,
                     <td className="py-2 text-right font-mono">{formatCurrency(sgst)}</td>
                   </tr>
                 </>
-              ) : (
+              )}
+              {applyGst && !isIntra && (
                 <tr>
                   <td className="py-2 text-slate-600">IGST</td>
                   <td className="py-2 text-right font-mono">{formatCurrency(igst)}</td>
