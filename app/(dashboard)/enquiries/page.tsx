@@ -87,6 +87,7 @@ function EnquiriesPageInner() {
   const openEditModal = (e: Enquiry) => {
     setEditingEnquiry(e);
     setFormType((e.type || 'tourist') as any);
+    setEnquiryPrefix(e.type === 'b2b' ? 'B2B' : e.type === 'tourist' ? 'PKG' : 'TR');
     setCustomerName(e.customerName || '');
     setMobile(e.mobile || '');
     setEmail(e.email || '');
@@ -429,7 +430,7 @@ function EnquiriesPageInner() {
           <DialogContent className="sm:max-w-3xl p-0 bg-[#effdf5] border-0 rounded-xl shadow-2xl flex flex-col max-h-[90vh]">
             <DialogHeader className="px-6 py-5 border-b border-gray-100 bg-[#effdf5]">
               <DialogTitle className="text-[20px] font-bold text-[#064e3b]">
-                {editingEnquiry ? 'Edit ' : 'New '}{enquiryPrefix === 'PKG' ? 'tour package' : 'transport'} enquiry
+                {editingEnquiry ? 'Edit ' : 'New '}{enquiryPrefix === 'PKG' ? 'tour package' : enquiryPrefix === 'B2B' ? 'B2B' : 'transport'} enquiry
               </DialogTitle>
               <DialogDescription className="hidden">Log customer enquiry</DialogDescription>
             </DialogHeader>
@@ -443,11 +444,15 @@ function EnquiriesPageInner() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1.5">
                     <Label className="text-[13px] font-semibold text-gray-800">Type</Label>
-                    <Select value={enquiryPrefix} onValueChange={(v) => setEnquiryPrefix(v as any)}>
+                    <Select value={enquiryPrefix} onValueChange={(v) => {
+                      setEnquiryPrefix(v as any);
+                      setFormType(v === 'B2B' ? 'b2b' : v === 'PKG' ? 'tourist' : 'corporate');
+                    }}>
                       <SelectTrigger className="bg-transparent border-gray-200/80 shadow-none h-10 rounded-[12px] text-gray-700 text-[14px]"><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="PKG">Tour package enquiry</SelectItem>
                         <SelectItem value="TR">Transport enquiry</SelectItem>
+                        <SelectItem value="B2B">B2B enquiry</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
