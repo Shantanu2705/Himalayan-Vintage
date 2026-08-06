@@ -151,7 +151,7 @@ function EnquiriesPageInner() {
         status: enquiryStatus,
       });
     } else {
-      const newId = `enq-${Date.now()}`;
+      const newId = `enq-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
       const typeEnquiries = enquiries.filter(e => (e.type === 'tourist' ? 'PKG' : e.type === 'b2b' ? 'B2B' : 'TR') === enquiryPrefix);
       const nextNum = typeEnquiries.length + 1;
       
