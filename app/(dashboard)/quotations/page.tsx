@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { StatusBadge } from '@/components/shared/status-badge';
 import { PdfPreviewModal } from '@/components/shared/pdf-preview-modal';
+import { QuotationPdfTemplate } from '@/components/pdf/quotation-template';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { formatCurrency, formatDate, formatPhoneNumber } from '@/utils/formatters';
 import {
