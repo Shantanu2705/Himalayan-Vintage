@@ -240,7 +240,24 @@ export const useFleetStore = create<FleetState>((set, get) => ({
   },
   deleteEnquiry: async (id) => {
     await FleetDatabase.deleteEnquiry(id);
-    set((s) => ({ enquiries: s.enquiries.filter((item) => item.id !== id) }));
+    const state = get();
+    
+    // Find linked quotations and bookings
+    const linkedQuotations = state.quotations.filter(q => q.enquiryId === id);
+    const linkedQuotationIds = linkedQuotations.map(q => q.id);
+    const linkedBookings = state.bookings.filter(b => b.enquiryId === id || (b.quotationId && linkedQuotationIds.includes(b.quotationId)));
+    
+    // Delete them from DB
+    await Promise.all([
+      ...linkedQuotationIds.map(qId => FleetDatabase.deleteQuotation(qId)),
+      ...linkedBookings.map(b => FleetDatabase.deleteBooking(b.id))
+    ]);
+
+    set((s) => ({ 
+      enquiries: s.enquiries.filter((item) => item.id !== id),
+      quotations: s.quotations.filter((q) => !linkedQuotationIds.includes(q.id)),
+      bookings: s.bookings.filter((b) => !linkedBookings.map(lb => lb.id).includes(b.id))
+    }));
   },
 
   addBooking: async (b) => {

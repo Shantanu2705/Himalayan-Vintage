@@ -10,38 +10,45 @@ interface ReceiptPdfTemplateProps {
 export const ReceiptPdfTemplate: React.FC<ReceiptPdfTemplateProps> = ({ receipt, settings }) => {
   return (
     <div className="space-y-8 text-[13px] font-sans text-black">
+
       {/* Header */}
-      <div className="flex justify-between items-start border-b-2 border-primary pb-6">
-        <div className="flex items-center gap-4">
+      <div className="grid grid-cols-3 items-start border-b-2 border-primary pb-6 gap-4">
+        {/* Left: Logo */}
+        <div className="flex justify-start">
           {settings?.logoUrl ? (
-            <img src={settings.logoUrl} alt="Company Logo" className="h-20 w-auto max-w-[220px] object-contain mix-blend-multiply" />
+            <img src={settings.logoUrl} alt="Company Logo" className="h-28 w-auto max-w-[240px] object-contain mix-blend-multiply" />
           ) : (
-            <div className="flex h-14 w-14 items-center justify-center rounded bg-slate-900 text-white font-bold">
+            <div className="flex h-20 w-20 items-center justify-center rounded-xl bg-slate-900 shadow-sm text-white font-bold text-xl">
               LOGO
             </div>
           )}
-          <div>
-            <h2 className="text-2xl font-extrabold tracking-tight uppercase text-primary">
-              {settings?.companyName || 'HIMALAYAN VINTAGE HOLIDAYS'}
-            </h2>
-            <p className="text-xs text-slate-600 mt-1">
-              {settings?.address || 'MG Marg, Gangtok, Sikkim — 737101'}
-            </p>
-            <div className="mt-2 text-xs font-mono space-y-0.5 text-slate-500">
-              <div>Phone: {settings?.phone || '+91 98300 12345'}</div>
-              <div>Email: {settings?.email || 'booking@himalayan.co'} | GSTIN: {settings?.gstin || '11AAAAA0000A1Z5'}</div>
-            </div>
-          </div>
         </div>
-        <div className="text-right">
-          <div className="text-2xl font-extrabold text-primary uppercase tracking-widest">OFFICIAL RECEIPT</div>
-          <div className="text-sm font-mono font-bold mt-2 text-slate-800">No: {receipt.receiptNo}</div>
-          <div className="text-xs mt-1 text-slate-600">Date: {formatDate(receipt.date || new Date().toISOString())}</div>
+
+        {/* Middle: Document Title */}
+        <div className="flex flex-col items-center justify-center text-center mt-2">
+          <div className="text-xl font-extrabold text-primary uppercase tracking-wider">OFFICIAL RECEIPT</div>
+          <div className="text-sm font-mono font-bold mt-2 text-slate-800">Receipt No: {receipt.receiptNo}</div>
+          <div className="text-xs text-slate-500 mt-0.5">Date: {formatDate(receipt.date || new Date().toISOString())}</div>
+        </div>
+
+        {/* Right: Company Details */}
+        <div className="flex flex-col items-end text-right">
+          <h2 className="text-lg font-extrabold tracking-tight uppercase text-primary">
+            {settings?.companyName || 'Himalayan Vintage Holidays'}
+          </h2>
+          <p className="text-[11px] text-slate-600 mt-1 max-w-[200px] leading-snug">
+            {settings?.address || 'MG Marg, Gangtok, Sikkim — 737101'}
+          </p>
+          <div className="mt-2 text-[10px] font-mono space-y-0.5 text-slate-500">
+            <div>Phone: {settings?.phone || '+91 98300 12345'}</div>
+            <div>Email: {settings?.email || 'booking@himalayan.co'}</div>
+            {settings?.gstin && <div>GSTIN: {settings?.gstin}</div>}
+          </div>
         </div>
       </div>
 
       <div className="text-center font-bold text-lg border-y-2 border-dashed border-slate-200 py-3 text-slate-700 uppercase tracking-widest">
-        Payment Receipt
+        {((Number(receipt.grandTotal) || 0) - (Number(receipt.amount) || Number(receipt.receivedAmount) || 0)) <= 0 ? 'Full Payment Receipt' : 'Advance Payment Receipt'}
       </div>
 
       {/* Main Body */}

@@ -217,6 +217,8 @@ export type BookingStatus = 'pending' | 'confirmed' | 'cancelled' | 'completed' 
 export interface Booking {
   id: string;
   bookingNo?: string;
+  quotationId?: string;
+  enquiryId?: string;
   clientName: string;
   clientType?: ClientType;
   vehicle?: VehicleCategory | string;

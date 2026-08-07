@@ -10,13 +10,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { StatusBadge } from '@/components/shared/status-badge';
 import { formatCurrency, formatDate } from '@/utils/formatters';
-import { Search, Plus, FileText, Receipt as ReceiptIcon, FileClock } from 'lucide-react';
+import { Search, Plus, FileText, Receipt as ReceiptIcon, FileClock, Trash2 } from 'lucide-react';
 import { Invoice, Receipt, Quotation, Booking } from '@/types';
 
 function BillingHubInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { invoices, receipts, quotations, bookings } = useFleetStore();
+  const { invoices, receipts, quotations, bookings, deleteReceipt, deleteInvoice } = useFleetStore();
   const tabParam = searchParams.get('tab') as 'quotations' | 'receipts' | 'invoices';
   const [activeTab, setActiveTab] = useState<'quotations' | 'receipts' | 'invoices'>(tabParam || 'quotations');
   const [searchTerm, setSearchTerm] = useState('');
@@ -145,12 +145,24 @@ function BillingHubInner() {
                       <TableCell className="font-bold text-[13px] text-gray-900">{formatCurrency(q.totalAmount)}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">
-                          <Button 
-                            onClick={() => router.push(`/billing/receipt/new?quotationId=${q.id}`)}
-                            variant="outline" size="sm" className="h-8 rounded-full text-[12px] font-semibold text-[#064e3b] bg-[#effdf5] border-[#064e3b]/20 hover:bg-[#dcfce7]"
-                          >
-                            <ReceiptIcon className="w-3.5 h-3.5 mr-1.5" /> Advance Receipt
-                          </Button>
+                          {isFullyPaid ? (
+                            <Button 
+                              onClick={() => {
+                                const latestReceipt = qReceipts[qReceipts.length - 1];
+                                if (latestReceipt) router.push(`/billing/receipt/${latestReceipt.id}`);
+                              }}
+                              variant="outline" size="sm" className="h-8 rounded-full text-[12px] font-semibold text-emerald-700 bg-emerald-50 border-emerald-200 hover:bg-emerald-100"
+                            >
+                              <ReceiptIcon className="w-3.5 h-3.5 mr-1.5" /> Full Receipt
+                            </Button>
+                          ) : (
+                            <Button 
+                              onClick={() => router.push(`/billing/receipt/new?quotationId=${q.id}`)}
+                              variant="outline" size="sm" className="h-8 rounded-full text-[12px] font-semibold text-[#064e3b] bg-[#effdf5] border-[#064e3b]/20 hover:bg-[#dcfce7]"
+                            >
+                              <ReceiptIcon className="w-3.5 h-3.5 mr-1.5" /> {isPartiallyPaid ? 'Add Receipt' : 'Advance Receipt'}
+                            </Button>
+                          )}
                           {existingInvoice ? (
                             <Button 
                               onClick={() => router.push(`/billing/invoice/${existingInvoice.id}`)}
@@ -241,7 +253,8 @@ function BillingHubInner() {
                   <TableHead className="font-semibold text-gray-600 text-[13px] h-11">Date</TableHead>
                   <TableHead className="font-semibold text-gray-600 text-[13px] h-11">Mode</TableHead>
                   <TableHead className="font-semibold text-gray-600 text-[13px] h-11">Received</TableHead>
-                  <TableHead className="font-semibold text-gray-600 text-[13px] h-11 rounded-tr-xl">Balance</TableHead>
+                  <TableHead className="font-semibold text-gray-600 text-[13px] h-11">Balance</TableHead>
+                  <TableHead className="font-semibold text-gray-600 text-[13px] h-11 rounded-tr-xl text-center w-[80px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -279,6 +292,21 @@ function BillingHubInner() {
                       <TableCell className="font-bold text-[13px] text-rose-600">
                         {formatCurrency(balance > 0 ? balance : 0)}
                       </TableCell>
+                      <TableCell className="text-center">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 w-8 rounded-full"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (window.confirm("Are you sure you want to delete this receipt?")) {
+                              deleteReceipt(r.id);
+                            }
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
                     </TableRow>
                     );
                   })
@@ -310,7 +338,8 @@ function BillingHubInner() {
                   <TableHead className="font-semibold text-gray-600 text-[13px] h-11">Supply</TableHead>
                   <TableHead className="font-semibold text-gray-600 text-[13px] h-11">Payment</TableHead>
                   <TableHead className="font-semibold text-gray-600 text-[13px] h-11">Total</TableHead>
-                  <TableHead className="font-semibold text-gray-600 text-[13px] h-11 rounded-tr-xl">Balance</TableHead>
+                  <TableHead className="font-semibold text-gray-600 text-[13px] h-11">Balance</TableHead>
+                  <TableHead className="font-semibold text-gray-600 text-[13px] h-11 rounded-tr-xl text-center w-[80px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -343,6 +372,21 @@ function BillingHubInner() {
                       </TableCell>
                       <TableCell className="font-bold text-[13px] text-gray-900">{formatCurrency(inv.totalAmount)}</TableCell>
                       <TableCell className="font-bold text-[13px] text-gray-900">{formatCurrency(inv.balanceAmount)}</TableCell>
+                      <TableCell className="text-center">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 w-8 rounded-full"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (window.confirm("Are you sure you want to delete this invoice?")) {
+                              deleteInvoice(inv.id);
+                            }
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
                     </TableRow>
                   ))
                 )}

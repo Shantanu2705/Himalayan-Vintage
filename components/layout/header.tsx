@@ -107,61 +107,6 @@ export const Header: React.FC<{ onOpenMobileSidebar?: () => void }> = ({ onOpenM
           )}
         </div>
 
-        {/* Theme Toggle */}
-        <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label="Toggle dark mode">
-          {isDark ? <Sun className="h-5 w-5 text-amber-400" /> : <Moon className="h-5 w-5 text-slate-600" />}
-        </Button>
-
-        {/* Notifications Dropdown */}
-        <div className="relative">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setShowNotifications(!showNotifications)}
-            className="relative"
-            aria-label="View notifications"
-          >
-            <Bell className="h-5 w-5" />
-            {unreadCount > 0 && (
-              <span className="absolute top-1.5 right-1.5 flex h-2 w-2 rounded-full bg-red-600 ring-2 ring-background" />
-            )}
-          </Button>
-
-          {showNotifications && (
-            <>
-              <div className="fixed inset-0 z-40" onClick={() => setShowNotifications(false)} />
-              <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-lg border bg-popover shadow-lg z-50 animate-in fade-in-80 zoom-in-95 overflow-hidden">
-                <div className="flex items-center justify-between border-b px-4 py-3 bg-muted/30">
-                  <span className="text-sm font-bold">Notifications</span>
-                  <span className="text-xs font-semibold px-2 py-0.5 rounded bg-primary/10 text-primary">
-                    {unreadCount} new
-                  </span>
-                </div>
-                <div className="max-h-80 overflow-y-auto divide-y">
-                  {notifications.length === 0 ? (
-                    <div className="p-4 text-center text-xs text-muted-foreground">No notifications</div>
-                  ) : (
-                    notifications.map((n) => (
-                      <div
-                        key={n.id}
-                        onClick={() => markNotificationRead(n.id)}
-                        className={`flex items-start gap-3 p-3 cursor-pointer transition-colors hover:bg-muted/40 ${
-                          !n.read ? 'bg-primary/5 font-medium' : 'opacity-80'
-                        }`}
-                      >
-                        <CheckCircle2 className={`h-4 w-4 mt-0.5 shrink-0 ${!n.read ? 'text-primary' : 'text-muted-foreground'}`} />
-                        <div className="flex-1 overflow-hidden">
-                          <div className="text-xs font-semibold">{n.title}</div>
-                          <div className="text-[11px] text-muted-foreground truncate">{n.message}</div>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-            </>
-          )}
-        </div>
 
         {/* User Menu & Logout */}
         <div className="flex items-center gap-2 border-l pl-2 md:pl-3">

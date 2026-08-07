@@ -133,7 +133,7 @@ function ReceiptEditorPageInner() {
               <button onClick={() => router.push('/billing')} className="text-gray-500 hover:text-gray-900 transition-colors flex items-center text-sm font-semibold">
                 <ArrowLeft className="w-4 h-4 mr-1" /> Billing
               </button>
-              <h1 className="text-2xl font-bold text-[#0f172a]">Advance Receipt {receipt.receiptNo}</h1>
+              <h1 className="text-2xl font-bold text-[#0f172a]">{balance <= 0 ? 'Full Payment' : 'Advance'} Receipt {receipt.receiptNo}</h1>
             </div>
             <div className="flex items-center gap-2">
               {!isNew && (

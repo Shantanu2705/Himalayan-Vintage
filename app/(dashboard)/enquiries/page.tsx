@@ -357,7 +357,7 @@ function EnquiriesPageInner() {
                       </Select>
                     </TableCell>
                     <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-4">
+                      <div className="flex items-center justify-end gap-2">
                         <button 
                           onClick={() => openEditModal(e)}
                           className="text-[13px] font-semibold text-[#475569] hover:text-[#0f172a] transition-colors"
@@ -369,6 +369,17 @@ function EnquiriesPageInner() {
                           className="flex items-center justify-center gap-1.5 h-8 px-4 rounded-full bg-[#fbbf24] hover:bg-[#f59e0b] text-[#422006] text-[12px] font-bold transition-colors"
                         >
                           <Sparkles className="h-3.5 w-3.5" /> Quote
+                        </button>
+                        <button 
+                          onClick={() => {
+                            if (window.confirm("Are you sure you want to delete this enquiry?")) {
+                              deleteEnquiry(e.id);
+                            }
+                          }}
+                          className="flex items-center justify-center h-8 w-8 rounded-full text-red-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                          title="Delete Enquiry"
+                        >
+                          <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
                     </TableCell>

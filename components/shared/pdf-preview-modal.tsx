@@ -87,18 +87,16 @@ export const PdfPreviewModal: React.FC<PdfPreviewModalProps> = ({
              {/* Border */}
              <div className="absolute border-[3px] border-primary/30 pointer-events-none" style={{ top: '12px', bottom: '12px', left: '12px', right: '12px' }} />
              <div className="absolute border border-primary/60 pointer-events-none" style={{ top: '17px', bottom: '17px', left: '17px', right: '17px' }} />
-             
              {/* Watermark Logo */}
              {settings?.logoUrl && (
                <img 
                  src={settings.logoUrl} 
                  alt="Watermark" 
-                 className="pointer-events-none"
+                 className="pointer-events-none drop-shadow-sm"
                  style={{ 
-                   maxWidth: '65%', 
-                   maxHeight: '65%', 
+                   maxWidth: '75%', 
+                   maxHeight: '75%', 
                    opacity: 0.12,
-                   mixBlendMode: 'multiply' 
                  }}
                />
              )}

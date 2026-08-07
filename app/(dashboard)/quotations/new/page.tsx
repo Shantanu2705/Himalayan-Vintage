@@ -90,6 +90,7 @@ function SmartQuotationBuilderForm() {
   const [vehicleNotes, setVehicleNotes] = useState('');
   const [additionalNotes, setAdditionalNotes] = useState('');
   const [remarks, setRemarks] = useState('');
+  const [terms, setTerms] = useState('');
   const [hasGst, setHasGst] = useState(true);
   useEffect(() => {
     if (enquiryId) {
@@ -99,10 +100,14 @@ function SmartQuotationBuilderForm() {
         setMobile(enq.mobile || '');
         setDestination(enq.destination || '');
         setPersons(String(enq.passengers || 2));
-        setClientType(enq.clientType || 'B2B');
+        setClientType(enq.type === 'b2b' ? 'B2B' : enq.type === 'corporate' ? 'Corporate' : (enq.clientType || 'B2C'));
         setPickup(enq.pickupLocation || '');
         setDrop(enq.destination || '');
         if (enq.startDate) setStartDate(enq.startDate.split('T')[0]);
+        if (enq.endDate) setEndDate(enq.endDate.split('T')[0]);
+        if (enq.type) {
+           setQType(enq.type === 'b2b' ? 'B2B' : enq.type === 'corporate' || enq.type === 'transport' ? 'Transport' : 'Tour package');
+        }
       }
     }
     
@@ -154,10 +159,41 @@ function SmartQuotationBuilderForm() {
         setVehicleNotes(quote.vehicleNotes || '');
         setAdditionalNotes(quote.additionalNotes || '');
         setRemarks(quote.remarks || '');
+        setTerms(quote.terms || settings?.termsAndConditions || '');
         if (quote.hasGst !== undefined) setHasGst(quote.hasGst);
       }
     }
-  }, [enquiryId, editId, enquiries, quotations]);
+  }, [enquiryId, editId, enquiries, quotations, settings]);
+
+  useEffect(() => {
+    if (!editId && settings?.termsAndConditions) {
+      setTerms(settings.termsAndConditions);
+    }
+  }, [settings, editId]);
+
+  useEffect(() => {
+    if (startDate && endDate) {
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      const diffTime = end.getTime() - start.getTime();
+      const diffDays = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1);
+      const diffNights = diffDays > 1 ? diffDays - 1 : 0;
+      setPackageDuration(`${diffDays}D / ${diffNights}N`);
+      
+      setItinerary(prev => {
+        if (prev.length === diffDays) return prev;
+        const newItinerary = [];
+        for (let i = 0; i < diffDays; i++) {
+          newItinerary.push({
+            id: prev[i]?.id || Date.now().toString() + i,
+            title: prev[i]?.title || `Day ${i + 1}`,
+            desc: prev[i]?.desc || ''
+          });
+        }
+        return newItinerary;
+      });
+    }
+  }, [startDate, endDate]);
 
   const handleSave = () => {
     const payload = {
@@ -191,11 +227,13 @@ function SmartQuotationBuilderForm() {
       vehicleNotes,
       additionalNotes,
       remarks,
+      terms,
+      hasGst,
       baseAmount: subtotal,
       totalAmount: grandTotal,
       grandTotal: grandTotal,
       gstAmount: gstAmount,
-      hasGst: hasGst,
+      enquiryId: enquiryId || undefined,
     };
 
     if (editId) {
@@ -204,8 +242,10 @@ function SmartQuotationBuilderForm() {
         updateQuotation({ ...quoteToUpdate, ...payload });
       }
     } else {
+      const newNo = `HVH/${new Date().getFullYear()}/${String(quotations.length + 1001).padStart(4, '0')}`;
       addQuotation({
         id: 'q-' + Date.now(),
+        quotationNo: newNo,
         date: new Date().toISOString(),
         ...payload
       } as any);
@@ -223,10 +263,18 @@ function SmartQuotationBuilderForm() {
   const advPct = Number(advancePercent) || 0;
 
   const packagePrice = Number(rateCard?.packagePrice) || 0;
-  const permitsAmt = Number(rateCard?.permits) || 0;
-  const extraVehicle = Number(rateCard?.extraVehicle) || 0;
+  
+  const calculateListSum = (list: string[]) => list.reduce((acc, item) => {
+    const match = item.match(/₹([\d,]+)/);
+    return match ? acc + Number(match[1].replace(/,/g, '')) : acc;
+  }, 0);
 
-  const subtotal = (packagePrice || vTotal) + permitsAmt + toll + parking + extraVehicle + additional;
+  const dynamicPermitsAmt = calculateListSum(permits);
+  const dynamicSightseeingAmt = calculateListSum(extraSightseeing);
+
+  const permitsAmt = (Number(rateCard?.permits) || 0) + dynamicPermitsAmt;
+
+  const subtotal = (packagePrice || vTotal) + permitsAmt + dynamicSightseeingAmt + toll + parking + additional;
 
   const gstAmount = (subtotal * gst) / 100;
   const grandTotal = subtotal + gstAmount;
@@ -297,6 +345,7 @@ function SmartQuotationBuilderForm() {
             <QuotationPdfTemplate 
               quotation={{
                 id: editId || 'NEW',
+                quotationNo: editId ? quotations.find(q => q.id === editId)?.quotationNo : undefined,
                 clientName: customerName,
                 customerName: customerName,
                 clientPhone: mobile,
@@ -316,7 +365,16 @@ function SmartQuotationBuilderForm() {
                 rateCard,
                 inclusions,
                 exclusions,
-                remarks
+                remarks,
+                terms,
+                pickupTiming,
+                dropTiming,
+                driverInstructions,
+                vehicleNotes,
+                additionalDetails,
+                additionalNotes,
+                permits,
+                extraSightseeing
               }} 
               settings={settings} 
             />
@@ -376,6 +434,7 @@ function SmartQuotationBuilderForm() {
                   <SelectContent>
                     <SelectItem value="Tour package">Tour package</SelectItem>
                     <SelectItem value="Transport">Transport</SelectItem>
+                    <SelectItem value="B2B">B2B</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -389,7 +448,7 @@ function SmartQuotationBuilderForm() {
               </div>
               <div className="space-y-1.5">
                 <Label className="text-[12px] font-bold text-gray-700">Destination</Label>
-                <Input className="h-11 rounded-[16px] border-gray-200 bg-transparent text-[14px] font-medium shadow-none" value={destination} onChange={e=>setDestination(e.target.value)} />
+                <Input list="locations-list" className="h-11 rounded-[16px] border-gray-200 bg-transparent text-[14px] font-medium shadow-none" value={destination} onChange={e=>setDestination(e.target.value)} />
               </div>
               <div className="space-y-1.5">
                 <Label className="text-[12px] font-bold text-gray-700">Persons</Label>
@@ -429,13 +488,25 @@ function SmartQuotationBuilderForm() {
                 <Label className="text-[12px] font-bold text-gray-700">Package duration</Label>
                 <Input className="h-11 rounded-[16px] border-gray-200 bg-transparent text-[14px] font-medium shadow-none" value={packageDuration} onChange={e=>setPackageDuration(e.target.value)} />
               </div>
+              <datalist id="locations-list">
+                <option value="Gangtok" />
+                <option value="Pelling" />
+                <option value="Lachung" />
+                <option value="Darjeeling" />
+                <option value="Kalimpong" />
+                <option value="Namchi" />
+                <option value="Zuluk" />
+                <option value="Ravangla" />
+                <option value="Yumthang Valley" />
+                <option value="Nathula" />
+              </datalist>
               <div className="space-y-1.5">
                 <Label className="text-[12px] font-bold text-gray-700">Pickup location</Label>
-                <Input className="h-11 rounded-[16px] border-gray-200 bg-transparent text-[14px] font-medium shadow-none" value={pickup} onChange={e=>setPickup(e.target.value)} />
+                <Input list="locations-list" className="h-11 rounded-[16px] border-gray-200 bg-transparent text-[14px] font-medium shadow-none" value={pickup} onChange={e=>setPickup(e.target.value)} />
               </div>
               <div className="space-y-1.5">
                 <Label className="text-[12px] font-bold text-gray-700">Drop location</Label>
-                <Input className="h-11 rounded-[16px] border-gray-200 bg-transparent text-[14px] font-medium shadow-none" value={drop} onChange={e=>setDrop(e.target.value)} />
+                <Input list="locations-list" className="h-11 rounded-[16px] border-gray-200 bg-transparent text-[14px] font-medium shadow-none" value={drop} onChange={e=>setDrop(e.target.value)} />
               </div>
             </div>
           </div>
@@ -468,9 +539,7 @@ function SmartQuotationBuilderForm() {
 
                   <div className="border border-gray-200 rounded-[16px] overflow-hidden bg-white group transition-colors shadow-[0_2px_4px_0_rgba(0,0,0,0.01)]">
                     <div className="flex items-center px-4 py-2 border-b border-gray-100">
-                      <Input className="h-9 border-0 bg-transparent px-0 font-medium text-[15px] shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-gray-400" value={day.title} onChange={e => {
-                        const newI = [...itinerary]; newI[idx].title = e.target.value; setItinerary(newI);
-                      }} placeholder="Enter day title..." />
+                      <span className="font-bold text-[15px] text-gray-800 flex-1">Day {idx + 1}</span>
                       <button onClick={() => setItinerary(itinerary.filter(i => i.id !== day.id))} className="text-red-400 hover:text-red-600 p-2 transition-opacity ml-2">
                         <Trash2 className="h-4 w-4" />
                       </button>
@@ -540,10 +609,6 @@ function SmartQuotationBuilderForm() {
                       <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 mt-4">
-                    <Input className="h-11 rounded-[12px] border-gray-200 bg-white text-[13px] font-medium shadow-sm text-gray-500" value={v.tbd1} onChange={e=>{const nv=[...vehicles]; nv[idx].tbd1=e.target.value; setVehicles(nv);}} />
-                    <Input className="h-11 rounded-[12px] border-gray-200 bg-white text-[13px] font-medium shadow-sm lg:col-span-2 text-gray-500" value={v.driverDetails} onChange={e=>{const nv=[...vehicles]; nv[idx].driverDetails=e.target.value; setVehicles(nv);}} />
-                  </div>
                 </div>
               ))}
             </div>
@@ -551,7 +616,7 @@ function SmartQuotationBuilderForm() {
 
           {/* Inclusions & Exclusions */}
           <div className="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100/50">
-            <h2 className="text-[17px] font-bold text-[#1e293b]">Inclusions & exclusions</h2>
+            <h2 className="text-[17px] font-bold text-[#1e293b]">Inclusions & Exclusions</h2>
             <p className="text-[12px] text-gray-500 font-medium mb-6">Everything covered — and everything not covered — in this quotation.</p>
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -606,6 +671,7 @@ function SmartQuotationBuilderForm() {
                         <SelectItem value="Travel Insurance">Travel Insurance</SelectItem>
                         <SelectItem value="GST (if applicable)">GST (if applicable)</SelectItem>
                         <SelectItem value="Extra Sightseeing">Extra Sightseeing</SelectItem>
+                        <SelectItem value="Parking">Parking</SelectItem>
                         <SelectItem value="Anything not mentioned in the inclusions">Anything not mentioned in the inclusions</SelectItem>
                       </SelectContent>
                     </Select>
@@ -743,8 +809,12 @@ function SmartQuotationBuilderForm() {
                 <Input type="number" className="h-11 rounded-[16px] border-gray-200 bg-transparent text-[13px] font-medium shadow-none" value={rateCard.parking} onChange={e=>setRateCard({...rateCard, parking: Number(e.target.value)})} />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-[11px] font-bold text-gray-700">Extra Vehicle</Label>
-                <Input type="number" className="h-11 rounded-[16px] border-gray-200 bg-transparent text-[13px] font-medium shadow-none" value={rateCard.extraVehicle} onChange={e=>setRateCard({...rateCard, extraVehicle: Number(e.target.value)})} />
+                <Label className="text-[11px] font-bold text-gray-700">Extra Kilometers</Label>
+                <Input type="number" className="h-11 rounded-[16px] border-gray-200 bg-transparent text-[13px] font-medium shadow-none" value={rateCard.extraKm} onChange={e=>setRateCard({...rateCard, extraKm: Number(e.target.value)})} />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-[11px] font-bold text-gray-700">Extra Number of Hours</Label>
+                <Input type="number" className="h-11 rounded-[16px] border-gray-200 bg-transparent text-[13px] font-medium shadow-none" value={rateCard.extraHour} onChange={e=>setRateCard({...rateCard, extraHour: Number(e.target.value)})} />
               </div>
               
               {/* Spacers to force next row to align left */}
@@ -773,7 +843,7 @@ function SmartQuotationBuilderForm() {
                   <span className="text-gray-900 font-bold">₹{(packagePrice || vTotal).toFixed(0)}</span>
                 </div>
                 <div className="flex justify-between text-gray-500 font-medium"><span>Driver allowance</span> <span className="text-gray-900 font-bold">₹0</span></div>
-                <div className="flex justify-between text-gray-500 font-medium"><span>Extras</span> <span className="text-gray-900 font-bold">₹{extraVehicle.toFixed(0)}</span></div>
+                {dynamicSightseeingAmt > 0 && <div className="flex justify-between text-gray-500 font-medium"><span>Extra Sightseeing</span> <span className="text-gray-900 font-bold">₹{dynamicSightseeingAmt.toFixed(0)}</span></div>}
                 <div className="flex justify-between text-gray-500 font-medium"><span>Permits</span> <span className="text-gray-900 font-bold">₹{permitsAmt.toFixed(0)}</span></div>
                 <div className="flex justify-between text-gray-500 font-medium"><span>Toll</span> <span className="text-gray-900 font-bold">₹{toll.toFixed(0)}</span></div>
                 <div className="flex justify-between text-gray-500 font-medium"><span>Parking</span> <span className="text-gray-900 font-bold">₹{parking.toFixed(0)}</span></div>
@@ -867,6 +937,7 @@ function SmartQuotationBuilderForm() {
               { id: 'transport', title: 'Transport details' },
               { id: 'notes', title: 'Additional notes' },
               { id: 'remarks', title: 'Remarks' },
+              { id: 'terms', title: 'Terms & Conditions' },
             ].map((acc) => (
               <div key={acc.id} className="bg-white rounded-[20px] border border-gray-100/50 overflow-hidden shadow-sm">
                 <button 
@@ -907,7 +978,10 @@ function SmartQuotationBuilderForm() {
                       <Textarea value={additionalNotes} onChange={e=>setAdditionalNotes(e.target.value)} className="min-h-[100px] border-gray-200 rounded-[16px] bg-transparent text-[14px] shadow-none mt-2" />
                     )}
                     {acc.id === 'remarks' && (
-                      <Textarea value={remarks} onChange={e=>setRemarks(e.target.value)} className="min-h-[100px] border-gray-200 rounded-[16px] bg-transparent text-[14px] shadow-none mt-2" placeholder="Displayed before the quotation footer" />
+                      <Textarea value={remarks} onChange={e=>setRemarks(e.target.value)} className="min-h-[100px] border-gray-200 rounded-[16px] bg-transparent text-[14px] shadow-none mt-2" placeholder="Internal remarks or client-facing notes" />
+                    )}
+                    {acc.id === 'terms' && (
+                      <Textarea value={terms} onChange={e=>setTerms(e.target.value)} className="min-h-[150px] border-gray-200 rounded-[16px] bg-transparent text-[14px] shadow-none mt-2" placeholder="Enter terms and conditions (e.g. Cancellation policy, Payment terms)..." />
                     )}
                   </div>
                 )}
