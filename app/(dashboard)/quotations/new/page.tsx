@@ -843,8 +843,25 @@ function SmartQuotationBuilderForm() {
                   <span className="text-gray-900 font-bold">₹{(packagePrice || vTotal).toFixed(0)}</span>
                 </div>
                 <div className="flex justify-between text-gray-500 font-medium"><span>Driver allowance</span> <span className="text-gray-900 font-bold">₹0</span></div>
-                {dynamicSightseeingAmt > 0 && <div className="flex justify-between text-gray-500 font-medium"><span>Extra Sightseeing</span> <span className="text-gray-900 font-bold">₹{dynamicSightseeingAmt.toFixed(0)}</span></div>}
-                <div className="flex justify-between text-gray-500 font-medium"><span>Permits</span> <span className="text-gray-900 font-bold">₹{permitsAmt.toFixed(0)}</span></div>
+                {dynamicSightseeingAmt > 0 && (
+                  <div className="flex flex-col gap-1">
+                    <div className="flex justify-between text-gray-500 font-medium"><span>Extra Sightseeing</span> <span className="text-gray-900 font-bold">₹{dynamicSightseeingAmt.toFixed(0)}</span></div>
+                    {extraSightseeing.length > 0 && (
+                      <div className="text-[11px] text-gray-400 pl-2 leading-relaxed">
+                        {extraSightseeing.map(s => s.split('—')[0].trim()).join(', ')}
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                <div className="flex flex-col gap-1">
+                  <div className="flex justify-between text-gray-500 font-medium"><span>Permits</span> <span className="text-gray-900 font-bold">₹{permitsAmt.toFixed(0)}</span></div>
+                  {permits.length > 0 && (
+                    <div className="text-[11px] text-gray-400 pl-2 leading-relaxed">
+                      {permits.map(s => s.split('—')[0].trim()).join(', ')}
+                    </div>
+                  )}
+                </div>
                 <div className="flex justify-between text-gray-500 font-medium"><span>Toll</span> <span className="text-gray-900 font-bold">₹{toll.toFixed(0)}</span></div>
                 <div className="flex justify-between text-gray-500 font-medium"><span>Parking</span> <span className="text-gray-900 font-bold">₹{parking.toFixed(0)}</span></div>
                 <div className="flex justify-between text-gray-500 font-medium"><span>Additional</span> <span className="text-gray-900 font-bold">₹{additional.toFixed(0)}</span></div>

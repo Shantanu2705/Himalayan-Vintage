@@ -73,12 +73,10 @@ export const QuotationPdfTemplate: React.FC<QuotationPdfTemplateProps> = ({ quot
             {quotation.itinerary.map((item: any, idx: number) => (
               <div key={idx} className="border-l-[3px] border-primary/60 pl-5 py-1 relative">
                 <div className="absolute -left-[7px] top-1.5 h-3 w-3 rounded-full bg-primary ring-4 ring-white" />
-                <div className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-2">
-                  <span className="text-sm font-extrabold text-primary uppercase">Day {item.day || idx + 1}</span>
-                  {item.title && <span className="text-sm font-bold text-slate-800 hidden sm:inline">—</span>}
-                  {item.title && <span className="text-sm font-bold text-slate-800">{item.title}</span>}
+                <div className="flex flex-col gap-1">
+                  <span className="text-sm font-extrabold text-primary uppercase">DAY {item.day || idx + 1}:</span>
+                  <p className="text-xs text-slate-600 leading-relaxed whitespace-pre-wrap">{item.desc || item.description}</p>
                 </div>
-                <p className="text-xs text-slate-600 mt-1.5 leading-relaxed whitespace-pre-wrap">{item.desc || item.description}</p>
               </div>
             ))}
           </div>
@@ -241,8 +239,13 @@ export const QuotationPdfTemplate: React.FC<QuotationPdfTemplateProps> = ({ quot
               )}
               {quotation.extraSightseeing?.length > 0 && (
                 <tr>
-                  <td className="p-2 font-medium text-slate-600">Extra Sightseeing</td>
-                  <td className="p-2 text-right font-mono">
+                  <td className="p-2 font-medium text-slate-600">
+                    <div>Extra Sightseeing</div>
+                    <div className="text-[10px] text-slate-400 mt-0.5 leading-snug font-normal">
+                      {quotation.extraSightseeing.map((s: string) => s.split('—')[0].trim()).join(', ')}
+                    </div>
+                  </td>
+                  <td className="p-2 text-right font-mono align-top">
                     {formatCurrency(quotation.extraSightseeing.reduce((acc: number, item: string) => {
                       const match = item.match(/₹([\d,]+)/);
                       return match ? acc + Number(match[1].replace(/,/g, '')) : acc;
@@ -252,8 +255,15 @@ export const QuotationPdfTemplate: React.FC<QuotationPdfTemplateProps> = ({ quot
               )}
               {(quotation.permits?.length > 0 || Number(quotation.rateCard?.permits) > 0) && (
                 <tr>
-                  <td className="p-2 font-medium text-slate-600">Permits</td>
-                  <td className="p-2 text-right font-mono">
+                  <td className="p-2 font-medium text-slate-600">
+                    <div>Permits</div>
+                    {quotation.permits?.length > 0 && (
+                      <div className="text-[10px] text-slate-400 mt-0.5 leading-snug font-normal">
+                        {quotation.permits.map((s: string) => s.split('—')[0].trim()).join(', ')}
+                      </div>
+                    )}
+                  </td>
+                  <td className="p-2 text-right font-mono align-top">
                     {formatCurrency(
                       (Number(quotation.rateCard?.permits) || 0) + 
                       (quotation.permits?.reduce((acc: number, item: string) => {
