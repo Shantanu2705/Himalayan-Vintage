@@ -47,7 +47,7 @@ function SmartQuotationBuilderForm() {
   
   const [startDate, setStartDate] = useState('2026-08-30');
   const [endDate, setEndDate] = useState('2026-09-03');
-  const [packageDuration, setPackageDuration] = useState('3N / 4D');
+  const [packageDuration, setPackageDuration] = useState('4D / 3N');
   const [pickup, setPickup] = useState('');
   const [drop, setDrop] = useState('');
 
@@ -181,7 +181,7 @@ function SmartQuotationBuilderForm() {
       const diffTime = end.getTime() - start.getTime();
       const diffDays = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1);
       const diffNights = diffDays > 1 ? diffDays - 1 : 0;
-      setPackageDuration(`${diffNights}N / ${diffDays}D`);
+      setPackageDuration(`${diffDays}D / ${diffNights}N`);
       
       setItinerary(prev => {
         if (prev.length === diffDays) return prev;
