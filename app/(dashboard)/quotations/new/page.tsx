@@ -108,6 +108,9 @@ function SmartQuotationBuilderForm() {
         if (enq.type) {
            setQType(enq.type === 'b2b' ? 'B2B' : enq.type === 'corporate' || enq.type === 'transport' ? 'Transport' : 'Tour package');
         }
+        if (enq.vehicle) {
+          setVehicles(prev => [{ ...prev[0], vehicle: enq.vehicle as string }]);
+        }
       }
     }
     
@@ -192,6 +195,13 @@ function SmartQuotationBuilderForm() {
         }
         return newItinerary;
       });
+
+      setVehicles(prev => prev.map(v => {
+        if (v.days !== diffDays) {
+          return { ...v, days: diffDays, total: v.qty * diffDays * v.rate };
+        }
+        return v;
+      }));
     }
   }, [startDate, endDate]);
 

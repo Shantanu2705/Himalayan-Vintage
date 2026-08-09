@@ -66,7 +66,7 @@ function EnquiriesPageInner() {
     setMobile('');
     setEmail('');
     setPickupLocation(type === 'b2b' ? 'NJP / Bagdogra' : 'Bagdogra Airport (IXB)');
-    setDestination(type === 'package' ? 'Gangtok & Darjeeling 5N/6D' : type === 'b2b' ? 'Multiple Destinations' : 'Gangtok');
+    setDestination('Gangtok');
     setVehicle('Innova Crysta');
     setStartDate(new Date().toISOString().split('T')[0]);
     setEndDate(new Date().toISOString().split('T')[0]);
@@ -510,11 +510,29 @@ function EnquiriesPageInner() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1.5">
                     <Label className="text-[13px] font-semibold text-gray-800">Pickup</Label>
-                    <Input required className="bg-transparent border-gray-200/80 shadow-none h-10 rounded-[12px] text-[14px]" value={pickupLocation} onChange={(e) => setPickupLocation(e.target.value)} placeholder="e.g. NJP / IXB / Siliguri" />
+                    <Select value={pickupLocation} onValueChange={setPickupLocation}>
+                      <SelectTrigger className="bg-transparent border-gray-200/80 shadow-none h-10 rounded-[12px] text-[14px]">
+                        <SelectValue placeholder="Select pickup location" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Array.from(new Set([pickupLocation, "Gangtok", "Pelling", "Lachung", "Darjeeling", "Kalimpong", "Namchi", "Zuluk", "Ravangla", "Yumthang Valley", "Nathula", "Bagdogra Airport (IXB)", "NJP / Bagdogra", "Siliguri"])).filter(Boolean).map(loc => (
+                          <SelectItem key={loc} value={loc}>{loc}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="space-y-1.5">
                     <Label className="text-[13px] font-semibold text-gray-800">Destination</Label>
-                    <Input required className="bg-transparent border-gray-200/80 shadow-none h-10 rounded-[12px] text-[14px]" value={destination} onChange={(e) => setDestination(e.target.value)} placeholder="Type or pick a destination" />
+                    <Select value={destination} onValueChange={setDestination}>
+                      <SelectTrigger className="bg-transparent border-gray-200/80 shadow-none h-10 rounded-[12px] text-[14px]">
+                        <SelectValue placeholder="Select destination" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Array.from(new Set([destination, "Gangtok", "Pelling", "Lachung", "Darjeeling", "Kalimpong", "Namchi", "Zuluk", "Ravangla", "Yumthang Valley", "Nathula", "Bagdogra Airport (IXB)", "NJP / Bagdogra", "Siliguri"])).filter(Boolean).map(loc => (
+                          <SelectItem key={loc} value={loc}>{loc}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="space-y-1.5">
                     <Label className="text-[13px] font-semibold text-gray-800">Start date</Label>
