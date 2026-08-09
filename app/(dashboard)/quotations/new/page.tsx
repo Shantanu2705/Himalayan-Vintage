@@ -181,7 +181,7 @@ function SmartQuotationBuilderForm() {
       const diffTime = end.getTime() - start.getTime();
       const diffDays = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1);
       const diffNights = diffDays > 1 ? diffDays - 1 : 0;
-      setPackageDuration(`${diffDays}D / ${diffNights}N`);
+      setPackageDuration(`${diffNights}N / ${diffDays}D`);
       
       setItinerary(prev => {
         if (prev.length === diffDays) return prev;
