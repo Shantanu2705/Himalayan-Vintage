@@ -508,31 +508,28 @@ function EnquiriesPageInner() {
               <div className="space-y-3">
                 <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Travel</h4>
                 <div className="grid grid-cols-2 gap-4">
+                  <datalist id="enquiry-locations-list">
+                    <option value="Gangtok" />
+                    <option value="Pelling" />
+                    <option value="Lachung" />
+                    <option value="Darjeeling" />
+                    <option value="Kalimpong" />
+                    <option value="Namchi" />
+                    <option value="Zuluk" />
+                    <option value="Ravangla" />
+                    <option value="Yumthang Valley" />
+                    <option value="Nathula" />
+                    <option value="Bagdogra Airport (IXB)" />
+                    <option value="NJP / Bagdogra" />
+                    <option value="Siliguri" />
+                  </datalist>
                   <div className="space-y-1.5">
                     <Label className="text-[13px] font-semibold text-gray-800">Pickup</Label>
-                    <Select value={pickupLocation} onValueChange={setPickupLocation}>
-                      <SelectTrigger className="bg-transparent border-gray-200/80 shadow-none h-10 rounded-[12px] text-[14px]">
-                        <SelectValue placeholder="Select pickup location" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Array.from(new Set([pickupLocation, "Gangtok", "Pelling", "Lachung", "Darjeeling", "Kalimpong", "Namchi", "Zuluk", "Ravangla", "Yumthang Valley", "Nathula", "Bagdogra Airport (IXB)", "NJP / Bagdogra", "Siliguri"])).filter(Boolean).map(loc => (
-                          <SelectItem key={loc} value={loc}>{loc}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <Input required list="enquiry-locations-list" className="bg-transparent border-gray-200/80 shadow-none h-10 rounded-[12px] text-[14px]" value={pickupLocation} onChange={(e) => setPickupLocation(e.target.value)} placeholder="e.g. NJP / IXB / Siliguri" />
                   </div>
                   <div className="space-y-1.5">
                     <Label className="text-[13px] font-semibold text-gray-800">Destination</Label>
-                    <Select value={destination} onValueChange={setDestination}>
-                      <SelectTrigger className="bg-transparent border-gray-200/80 shadow-none h-10 rounded-[12px] text-[14px]">
-                        <SelectValue placeholder="Select destination" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Array.from(new Set([destination, "Gangtok", "Pelling", "Lachung", "Darjeeling", "Kalimpong", "Namchi", "Zuluk", "Ravangla", "Yumthang Valley", "Nathula", "Bagdogra Airport (IXB)", "NJP / Bagdogra", "Siliguri"])).filter(Boolean).map(loc => (
-                          <SelectItem key={loc} value={loc}>{loc}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <Input required list="enquiry-locations-list" className="bg-transparent border-gray-200/80 shadow-none h-10 rounded-[12px] text-[14px]" value={destination} onChange={(e) => setDestination(e.target.value)} placeholder="Type or pick a destination" />
                   </div>
                   <div className="space-y-1.5">
                     <Label className="text-[13px] font-semibold text-gray-800">Start date</Label>
