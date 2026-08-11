@@ -585,7 +585,15 @@ function SmartQuotationBuilderForm() {
                       <Label className="text-[11px] font-bold text-gray-700">Vehicle</Label>
                       <Select value={v.vehicle} onValueChange={(val) => { const nv=[...vehicles]; nv[idx].vehicle=val; setVehicles(nv); }}>
                         <SelectTrigger className="h-11 rounded-[12px] border-gray-200 bg-white text-[13px] font-medium shadow-sm"><SelectValue /></SelectTrigger>
-                        <SelectContent><SelectItem value="Sedan">Sedan</SelectItem><SelectItem value="SUV">SUV</SelectItem><SelectItem value="Innova">Innova</SelectItem></SelectContent>
+                        <SelectContent>
+                          <SelectItem value="Sedan">Sedan</SelectItem>
+                          <SelectItem value="SUV">SUV</SelectItem>
+                          <SelectItem value="Innova Crysta">Innova Crysta</SelectItem>
+                          <SelectItem value="Tempo Traveller">Tempo Traveller</SelectItem>
+                          <SelectItem value="22 Seater Bus">22 Seater Bus</SelectItem>
+                          <SelectItem value="27 Seater Bus">27 Seater Bus</SelectItem>
+                          <SelectItem value="Premium Coach">Premium Coach</SelectItem>
+                        </SelectContent>
                       </Select>
                     </div>
                     <div className="w-28 space-y-1.5">
