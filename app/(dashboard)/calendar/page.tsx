@@ -52,59 +52,6 @@ export default function CalendarPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBooking, setEditingBooking] = useState<Booking | null>(null);
 
-  // Auto load dummy data if calendar is empty
-  useEffect(() => {
-    if (bookings.length === 0) {
-      const generateDummyData = async () => {
-        const year = new Date().getFullYear();
-        const month = new Date().getMonth();
-        const dummyBookings: Array<Partial<Booking> & { dOff: number }> = [
-          { clientName: 'Kavya Sinha', vehicle: 'SUV', clientType: 'tourist', status: 'confirmed', dOff: -2 },
-          { clientName: 'Neha Gupta', vehicle: '27 Seater Bus', clientType: 'tourist', status: 'confirmed', dOff: -2 },
-          { clientName: 'Priya Das', vehicle: 'SUV', clientType: 'tourist', status: 'confirmed', dOff: -2 },
-          { clientName: 'Siddharth Khan', vehicle: '27 Seater Bus', clientType: 'tourist', status: 'confirmed', dOff: -1 },
-          { clientName: 'Meera Gupta', vehicle: 'SUV', clientType: 'tourist', status: 'confirmed', dOff: -1 },
-          { clientName: 'Manish Sinha', vehicle: 'Sedan', clientType: 'corporate', status: 'pending', dOff: 0 },
-          { clientName: 'Aarav Sinha', vehicle: 'Tempo Traveller', clientType: 'corporate', status: 'pending', dOff: 1 },
-          { clientName: 'Rahul Roy', vehicle: '27 Seater Bus', clientType: 'tourist', status: 'confirmed', dOff: 2 },
-          { clientName: 'Suresh Gupta', vehicle: 'Tempo Traveller', clientType: 'corporate', status: 'pending', dOff: 2 },
-          { clientName: 'Pooja Chatterjee', vehicle: 'Tempo Traveller', clientType: 'corporate', status: 'pending', dOff: 2 },
-          { clientName: 'Ankit Nair', vehicle: 'SUV', clientType: 'tourist', status: 'cancelled', dOff: 6 },
-          { clientName: 'Karan Bose', vehicle: 'Innova Crysta', clientType: 'corporate', status: 'confirmed', dOff: 6 },
-          { clientName: 'Ananya Kapoor', vehicle: '22 Seater Bus', clientType: 'corporate', status: 'confirmed', dOff: 11 },
-          { clientName: 'Siddharth Rao', vehicle: '22 Seater Bus', clientType: 'tourist', status: 'confirmed', dOff: 11 },
-          { clientName: 'Suresh Menon', vehicle: 'Sedan', clientType: 'corporate', status: 'pending', dOff: 11 },
-          { clientName: 'Kavya Bose', vehicle: 'Innova Crysta', clientType: 'tourist', status: 'cancelled', dOff: 18 },
-          { clientName: 'Aditya Das', vehicle: 'Innova Crysta', clientType: 'corporate', status: 'confirmed', dOff: 18 },
-          { clientName: 'Rahul Verma', vehicle: '27 Seater Bus', clientType: 'tourist', status: 'cancelled', dOff: 21 },
-          { clientName: 'Rohan Iyer', vehicle: '22 Seater Bus', clientType: 'tourist', status: 'confirmed', dOff: 21 },
-          { clientName: 'Siddharth Kapoor', vehicle: 'Sedan', clientType: 'corporate', status: 'pending', dOff: 25 },
-        ];
-
-        for (let i = 0; i < dummyBookings.length; i++) {
-          const b = dummyBookings[i];
-          const d = new Date(year, month, new Date().getDate() + (b.dOff as number));
-          await addBooking({
-            id: `dummy-${i}-${Math.random().toString(36).substr(2, 9)}`,
-            bookingNo: `BKG-${1000 + i}`,
-            clientName: b.clientName!,
-            clientType: b.clientType!,
-            vehicle: b.vehicle!,
-            pickup: 'City Center',
-            destination: 'Airport',
-            startDate: d.toISOString(),
-            endDate: d.toISOString(),
-            amount: 5000,
-            status: b.status as BookingStatus,
-            advance: 0,
-            createdAt: new Date().toISOString(),
-          });
-        }
-      };
-      generateDummyData();
-    }
-  }, [bookings.length, addBooking]);
-
   // Form states
   const [clientName, setClientName] = useState('');
   const [clientType, setClientType] = useState<ClientType>('tourist');

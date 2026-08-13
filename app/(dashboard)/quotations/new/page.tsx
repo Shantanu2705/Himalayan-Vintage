@@ -332,7 +332,7 @@ function SmartQuotationBuilderForm() {
                 <Check className="h-4 w-4 mr-2" /> Save Quotation
               </button>
             )}
-            <button className="h-9 px-4 rounded-full border border-gray-200 bg-white/50 flex items-center text-[13px] font-semibold text-gray-700 hover:bg-white transition-colors">
+            <button onClick={() => window.open('https://wa.me/919851544861', '_blank')} className="h-9 px-4 rounded-full border border-gray-200 bg-white/50 flex items-center text-[13px] font-semibold text-gray-700 hover:bg-white transition-colors">
               <MessageCircle className="h-3.5 w-3.5 mr-2" /> WhatsApp
             </button>
             <button className="h-9 px-4 rounded-full border border-gray-200 bg-white/50 flex items-center text-[13px] font-semibold text-gray-700 hover:bg-white transition-colors">
@@ -509,6 +509,11 @@ function SmartQuotationBuilderForm() {
                 <option value="Ravangla" />
                 <option value="Yumthang Valley" />
                 <option value="Nathula" />
+                <option value="Ixb Bagdogra" />
+                <option value="Njp" />
+                <option value="Siliguri Junction" />
+                <option value="Lataguri" />
+                <option value="Jaigaon" />
               </datalist>
               <div className="space-y-1.5">
                 <Label className="text-[12px] font-bold text-gray-700">Pickup location</Label>
@@ -555,7 +560,7 @@ function SmartQuotationBuilderForm() {
                       </button>
                     </div>
                     <Textarea 
-                      className="border-0 bg-transparent px-4 py-3 min-h-[60px] text-[14px] text-gray-600 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 resize-none placeholder:text-gray-400"
+                      className="border-0 bg-transparent px-4 py-3 min-h-[120px] text-[14px] text-gray-600 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 resize-y placeholder:text-gray-400"
                       value={day.desc}
                       placeholder="Enter day description..."
                       onChange={e => {
@@ -952,7 +957,14 @@ function SmartQuotationBuilderForm() {
                 <Label className="text-[11px] font-bold text-gray-700">Advance amount</Label>
                 <div className="relative">
                   <span className="absolute left-4 top-3.5 text-[14px] font-bold text-yellow-600">₹</span>
-                  <Input readOnly className="h-11 pl-8 rounded-[16px] border-orange-100 bg-orange-50/50 text-[14px] font-bold shadow-none text-yellow-600" value={advanceAmount.toFixed(0)} />
+                  <Input type="number" className="h-11 pl-8 rounded-[16px] border-orange-200 bg-orange-50/50 focus:bg-white text-[14px] font-bold shadow-none text-yellow-700" value={Math.round(advanceAmount)} onChange={e => {
+                    const amt = Number(e.target.value);
+                    if (grandTotal > 0) {
+                      setAdvancePercent(Number((amt / grandTotal * 100).toFixed(2)));
+                    } else {
+                      setAdvancePercent(0);
+                    }
+                  }} />
                 </div>
               </div>
               <div className="space-y-1.5">
