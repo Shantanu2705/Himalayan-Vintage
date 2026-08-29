@@ -44,7 +44,7 @@ const getBookingColor = (b: Booking) => {
 type ViewMode = 'day' | 'week' | 'month';
 
 export default function CalendarPage() {
-  const { bookings, addBooking, updateBooking, deleteBooking } = useFleetStore();
+  const { bookings, quotations, addBooking, updateBooking, deleteBooking } = useFleetStore();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<ViewMode>('month');
   const [searchQuery, setSearchQuery] = useState('');
@@ -63,16 +63,42 @@ export default function CalendarPage() {
   const [amount, setAmount] = useState<number>(0);
   const [status, setStatus] = useState<BookingStatus>('confirmed');
 
+  const allCalendarItems = useMemo(() => {
+    const items = [...bookings];
+    
+    // Auto-inject confirmed quotations into the calendar
+    const confirmedQuotes = (quotations || []).filter(q => q.status === 'confirmed');
+    confirmedQuotes.forEach(q => {
+      items.push({
+        id: `quote-${q.id}`,
+        clientName: q.customerName || q.clientName || 'Unknown',
+        vehicle: q.vehicles?.[0]?.type || 'Package Tour',
+        destination: q.destination || '',
+        pickup: q.pickupLocation || '',
+        startDate: q.startDate,
+        endDate: q.endDate || q.startDate,
+        status: 'confirmed',
+        clientType: (q.clientType?.toLowerCase() as ClientType) || 'tourist',
+        amount: q.totalAmount || 0,
+        bookingNo: q.quotationNo || 'Q-Ref',
+        createdAt: q.date || new Date().toISOString(),
+        isQuotation: true,
+        originalQuotationId: q.id
+      } as any);
+    });
+    return items;
+  }, [bookings, quotations]);
+
   const filteredBookings = useMemo(() => {
-    if (!searchQuery.trim()) return bookings;
+    if (!searchQuery.trim()) return allCalendarItems;
     const lower = searchQuery.toLowerCase();
-    return bookings.filter(b => 
+    return allCalendarItems.filter(b => 
       b.clientName?.toLowerCase().includes(lower) ||
       b.vehicle?.toLowerCase().includes(lower) ||
       b.destination?.toLowerCase().includes(lower) ||
       b.pickup?.toLowerCase().includes(lower)
     );
-  }, [bookings, searchQuery]);
+  }, [allCalendarItems, searchQuery]);
 
   const handlePrev = () => {
     const next = new Date(currentDate);
@@ -251,7 +277,11 @@ export default function CalendarPage() {
               key={b.id}
               onClick={(e) => {
                 e.stopPropagation();
-                openEditModal(b);
+                if ((b as any).isQuotation) {
+                  window.location.href = `/quotations/new?id=${(b as any).originalQuotationId}`;
+                } else {
+                  openEditModal(b);
+                }
               }}
               className={cn(
                 "flex items-center gap-1.5 px-1.5 py-[3px] rounded-sm border cursor-pointer hover:brightness-95 transition-all text-[10px] font-medium truncate",
