@@ -192,9 +192,12 @@ function SmartQuotationBuilderForm() {
       setPackageDuration(`${diffDays}D / ${diffNights}N`);
       
       setItinerary(prev => {
-        // Only grow the itinerary to match dates, never shrink it to prevent data loss.
-        // Users can manually delete days if they shorten the date range.
-        if (prev.length >= diffDays) return prev;
+        // Sync the itinerary length exactly to the calculated difference in days.
+        if (prev.length === diffDays) return prev;
+        
+        if (prev.length > diffDays) {
+          return prev.slice(0, diffDays);
+        }
         
         const newItinerary = [...prev];
         for (let i = prev.length; i < diffDays; i++) {
