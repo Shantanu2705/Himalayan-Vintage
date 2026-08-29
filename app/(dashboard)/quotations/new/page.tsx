@@ -184,13 +184,16 @@ function SmartQuotationBuilderForm() {
       setPackageDuration(`${diffDays}D / ${diffNights}N`);
       
       setItinerary(prev => {
-        if (prev.length === diffDays) return prev;
-        const newItinerary = [];
-        for (let i = 0; i < diffDays; i++) {
+        // Only grow the itinerary to match dates, never shrink it to prevent data loss.
+        // Users can manually delete days if they shorten the date range.
+        if (prev.length >= diffDays) return prev;
+        
+        const newItinerary = [...prev];
+        for (let i = prev.length; i < diffDays; i++) {
           newItinerary.push({
-            id: prev[i]?.id || Date.now().toString() + i,
-            title: prev[i]?.title || `Day ${i + 1}`,
-            desc: prev[i]?.desc || ''
+            id: Date.now().toString() + i,
+            title: `Day ${i + 1}`,
+            desc: ''
           });
         }
         return newItinerary;
