@@ -12,18 +12,22 @@ export interface User {
 }
 
 export type VehicleCategory = 
-  | 'Sedan' 
-  | 'SUV' 
-  | 'Innova Crysta' 
-  | 'Tempo Traveller' 
-  | '22 Seater Bus' 
-  | '27 Seater Bus'
-  | 'Toyota Innova'
-  | 'Scorpio N / Classic'
-  | 'Maruti Ertiga / Rumion'
-  | 'Force Traveller 12-Seater'
-  | 'Force Traveller 17-Seater'
-  | 'Luxury Coach 25-Seater'
+  | 'WAGNOR'
+  | 'Sedan - Swift Dzire'
+  | 'Innova / Xylo'
+  | 'Innova Crysta'
+  | '11 Tempo Traveller'
+  | '12 Seater Tempo Traveller'
+  | '14 Seater Tempo Traveller'
+  | '17 Seater Tempo Traveller'
+  | '22 seater AC PREMIUM BUS'
+  | '26 SEATER AC PREMIUM BUS'
+  | '35 SEATER AC PREMIUM BUS'
+  | '40 SEATER AC PREMIUM BUS'
+  | 'URBANIA - 16 SEATER'
+  | 'AC BOLERO'
+  | 'TATA SUMO'
+  | 'BOLERO'
   | string;
 
 export type VehicleType = VehicleCategory;

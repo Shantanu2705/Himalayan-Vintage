@@ -621,13 +621,22 @@ function SmartQuotationBuilderForm() {
                       <Select value={v.vehicle} onValueChange={(val) => { const nv=[...vehicles]; nv[idx].vehicle=val; setVehicles(nv); }}>
                         <SelectTrigger className="h-11 rounded-[12px] border-gray-200 bg-white text-[13px] font-medium shadow-sm"><SelectValue /></SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="Sedan">Sedan</SelectItem>
-                          <SelectItem value="SUV">SUV</SelectItem>
+                          <SelectItem value="WAGNOR">WAGNOR</SelectItem>
+                          <SelectItem value="Sedan - Swift Dzire">Sedan - Swift Dzire</SelectItem>
+                          <SelectItem value="Innova / Xylo">Innova / Xylo</SelectItem>
                           <SelectItem value="Innova Crysta">Innova Crysta</SelectItem>
-                          <SelectItem value="Tempo Traveller">Tempo Traveller</SelectItem>
-                          <SelectItem value="22 Seater Bus">22 Seater Bus</SelectItem>
-                          <SelectItem value="27 Seater Bus">27 Seater Bus</SelectItem>
-                          <SelectItem value="Premium Coach">Premium Coach</SelectItem>
+                          <SelectItem value="11 Tempo Traveller">11 Tempo Traveller</SelectItem>
+                          <SelectItem value="12 Seater Tempo Traveller">12 Seater Tempo Traveller</SelectItem>
+                          <SelectItem value="14 Seater Tempo Traveller">14 Seater Tempo Traveller</SelectItem>
+                          <SelectItem value="17 Seater Tempo Traveller">17 Seater Tempo Traveller</SelectItem>
+                          <SelectItem value="22 seater AC PREMIUM BUS">22 seater AC PREMIUM BUS</SelectItem>
+                          <SelectItem value="26 SEATER AC PREMIUM BUS">26 SEATER AC PREMIUM BUS</SelectItem>
+                          <SelectItem value="35 SEATER AC PREMIUM BUS">35 SEATER AC PREMIUM BUS</SelectItem>
+                          <SelectItem value="40 SEATER AC PREMIUM BUS">40 SEATER AC PREMIUM BUS</SelectItem>
+                          <SelectItem value="URBANIA - 16 SEATER">URBANIA - 16 SEATER</SelectItem>
+                          <SelectItem value="AC BOLERO">AC BOLERO</SelectItem>
+                          <SelectItem value="TATA SUMO">TATA SUMO</SelectItem>
+                          <SelectItem value="BOLERO">BOLERO</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
