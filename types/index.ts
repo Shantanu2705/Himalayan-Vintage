@@ -185,6 +185,7 @@ export interface Quotation {
   pickupLocation: string;
   vehicle: string;
   startDate: string;
+  endDate?: string;
   travelDate?: string;
   destination: string;
   persons?: number;
