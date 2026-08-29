@@ -36,6 +36,12 @@ if (!getApps().length) {
 
 const db = getFirestore();
 
+if (process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID === 'himalayanvintage') {
+  console.error('❌ SAFETY LOCK: You are trying to wipe/seed the LIVE production database!');
+  console.error('If you really mean to do this, temporarily change the safety lock in scripts/seed-admin.ts');
+  process.exit(1);
+}
+
 async function runSeed() {
   console.log(`🚀 Starting Admin SDK live database seed for ${process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID}...`);
   let count = 0;

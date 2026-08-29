@@ -21,6 +21,12 @@ if (!getApps().length) {
 
 const db = getFirestore();
 
+if (process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID === 'himalayanvintage') {
+  console.error('❌ SAFETY LOCK: You are trying to wipe the LIVE production database!');
+  console.error('If you really mean to do this, temporarily change the safety lock in scripts/wipe-admin.ts');
+  process.exit(1);
+}
+
 async function deleteCollection(collectionPath: string, batchSize: number = 100) {
   const collectionRef = db.collection(collectionPath);
   const query = collectionRef.orderBy('__name__').limit(batchSize);
