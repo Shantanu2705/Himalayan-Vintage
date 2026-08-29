@@ -174,7 +174,15 @@ function SmartQuotationBuilderForm() {
     }
   }, [settings, editId]);
 
+  const isInitialMount = React.useRef(true);
+
   useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      // Skip the first run so we don't overwrite saved data on load
+      return;
+    }
+
     if (startDate && endDate) {
       const start = new Date(startDate);
       const end = new Date(endDate);
