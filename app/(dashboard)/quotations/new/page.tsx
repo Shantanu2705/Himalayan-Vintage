@@ -216,6 +216,24 @@ function SmartQuotationBuilderForm() {
     }
   }, [startDate, endDate]);
 
+  // Magic auto-updater: when user manually types "7D" in the package duration field,
+  // automatically advance the Travel End Date to match.
+  useEffect(() => {
+    const match = packageDuration.match(/^(\d+)\s*D/i);
+    if (match && startDate) {
+      const days = parseInt(match[1]);
+      if (days > 0) {
+        const start = new Date(startDate);
+        const end = new Date(start);
+        end.setDate(start.getDate() + (days - 1));
+        const newEndDateStr = end.toISOString().split('T')[0];
+        if (newEndDateStr !== endDate) {
+          setEndDate(newEndDateStr);
+        }
+      }
+    }
+  }, [packageDuration, startDate]);
+
   const handleSave = () => {
     const payload = {
       clientName: customerName,
