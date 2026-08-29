@@ -187,6 +187,7 @@ export interface Quotation {
   startDate: string;
   endDate?: string;
   travelDate?: string;
+  date?: string;
   destination: string;
   persons?: number;
   passengers: number;
