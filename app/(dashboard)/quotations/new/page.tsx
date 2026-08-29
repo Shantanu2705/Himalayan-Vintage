@@ -219,24 +219,6 @@ function SmartQuotationBuilderForm() {
     }
   }, [startDate, endDate]);
 
-  // Magic auto-updater: when user manually types "7D" in the package duration field,
-  // automatically advance the Travel End Date to match.
-  useEffect(() => {
-    const match = packageDuration.match(/^(\d+)\s*D/i);
-    if (match && startDate) {
-      const days = parseInt(match[1]);
-      if (days > 0) {
-        const start = new Date(startDate);
-        const end = new Date(start);
-        end.setDate(start.getDate() + (days - 1));
-        const newEndDateStr = end.toISOString().split('T')[0];
-        if (newEndDateStr !== endDate) {
-          setEndDate(newEndDateStr);
-        }
-      }
-    }
-  }, [packageDuration, startDate]);
-
   const handleSave = () => {
     const payload = {
       clientName: customerName,
@@ -528,7 +510,23 @@ function SmartQuotationBuilderForm() {
               </div>
               <div className="space-y-1.5">
                 <Label className="text-[12px] font-bold text-gray-700">Package duration</Label>
-                <Input className="h-11 rounded-[16px] border-gray-200 bg-transparent text-[14px] font-medium shadow-none" value={packageDuration} onChange={e=>setPackageDuration(e.target.value)} />
+                <Input className="h-11 rounded-[16px] border-gray-200 bg-transparent text-[14px] font-medium shadow-none" value={packageDuration} onChange={e=>{
+                  const val = e.target.value;
+                  setPackageDuration(val);
+                  
+                  // Magic auto-updater: manually advancing Travel End Date without circular effects
+                  const match = val.match(/^(\d+)\s*D/i);
+                  if (match && startDate) {
+                    const days = parseInt(match[1]);
+                    if (days > 0) {
+                      const start = new Date(startDate);
+                      const end = new Date(start);
+                      end.setDate(start.getDate() + (days - 1));
+                      const newEndDateStr = end.toISOString().split('T')[0];
+                      setEndDate(newEndDateStr);
+                    }
+                  }
+                }} />
               </div>
               <datalist id="locations-list">
                 <option value="Gangtok" />
