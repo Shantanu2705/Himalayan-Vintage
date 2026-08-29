@@ -257,7 +257,7 @@ function SmartQuotationBuilderForm() {
       totalAmount: grandTotal,
       grandTotal: grandTotal,
       gstAmount: gstAmount,
-      enquiryId: enquiryId || undefined,
+      enquiryId: enquiryId || null,
     };
 
     if (editId) {
