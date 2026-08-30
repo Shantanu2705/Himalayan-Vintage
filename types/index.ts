@@ -28,6 +28,12 @@ export type VehicleCategory =
   | 'AC BOLERO'
   | 'TATA SUMO'
   | 'BOLERO'
+  | 'Coaster bus'
+  | 'Hiace bus'
+  | 'High Roof Coaster'
+  | 'SUV'
+  | 'CRETA'
+  | 'BYD'
   | string;
 
 export type VehicleType = VehicleCategory;

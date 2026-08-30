@@ -382,18 +382,37 @@ function BookingsHubContent() {
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               <div className="space-y-1.5">
                 <Label className="text-xs font-semibold">Vehicle Assigned</Label>
-                <Select value={vehicle} onValueChange={(v) => setVehicle(v as VehicleType)}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Innova Crysta">Innova Crysta</SelectItem>
-                    <SelectItem value="Toyota Innova">Toyota Innova</SelectItem>
-                    <SelectItem value="Scorpio N / Classic">Scorpio N / Classic</SelectItem>
-                    <SelectItem value="Maruti Ertiga / Rumion">Maruti Ertiga / Rumion</SelectItem>
-                    <SelectItem value="Force Traveller 12-Seater">Force Traveller 12-Seater</SelectItem>
-                    <SelectItem value="Force Traveller 17-Seater">Force Traveller 17-Seater</SelectItem>
-                    <SelectItem value="Luxury Coach 25-Seater">Luxury Coach 25-Seater</SelectItem>
-                  </SelectContent>
-                </Select>
+                <datalist id="booking-vehicles-list">
+                  <option value="WAGNOR" />
+                  <option value="Sedan - Swift Dzire" />
+                  <option value="Innova / Xylo" />
+                  <option value="Innova Crysta" />
+                  <option value="Toyota Innova" />
+                  <option value="Scorpio N / Classic" />
+                  <option value="Maruti Ertiga / Rumion" />
+                  <option value="11 Tempo Traveller" />
+                  <option value="12 Seater Tempo Traveller" />
+                  <option value="Force Traveller 12-Seater" />
+                  <option value="14 Seater Tempo Traveller" />
+                  <option value="17 Seater Tempo Traveller" />
+                  <option value="Force Traveller 17-Seater" />
+                  <option value="22 seater AC PREMIUM BUS" />
+                  <option value="Luxury Coach 25-Seater" />
+                  <option value="26 SEATER AC PREMIUM BUS" />
+                  <option value="35 SEATER AC PREMIUM BUS" />
+                  <option value="40 SEATER AC PREMIUM BUS" />
+                  <option value="URBANIA - 16 SEATER" />
+                  <option value="AC BOLERO" />
+                  <option value="TATA SUMO" />
+                  <option value="BOLERO" />
+                  <option value="Coaster bus" />
+                  <option value="Hiace bus" />
+                  <option value="High Roof Coaster" />
+                  <option value="SUV" />
+                  <option value="CRETA" />
+                  <option value="BYD" />
+                </datalist>
+                <Input required list="booking-vehicles-list" className="h-10 rounded-[12px] text-[14px]" value={vehicle} onChange={(e) => setVehicle(e.target.value as VehicleType)} placeholder="Select or type vehicle" />
               </div>
 
               <div className="space-y-1.5">

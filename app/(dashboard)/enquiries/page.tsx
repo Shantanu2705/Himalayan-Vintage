@@ -545,27 +545,31 @@ function EnquiriesPageInner() {
                   </div>
                   <div className="space-y-1.5">
                     <Label className="text-[13px] font-semibold text-gray-800">Vehicle</Label>
-                    <Select value={vehicle} onValueChange={(v) => setVehicle(v as VehicleType)}>
-                      <SelectTrigger className="bg-transparent border-gray-200/80 shadow-none h-10 rounded-[12px] text-[14px]"><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="WAGNOR">WAGNOR</SelectItem>
-                        <SelectItem value="Sedan - Swift Dzire">Sedan - Swift Dzire</SelectItem>
-                        <SelectItem value="Innova / Xylo">Innova / Xylo</SelectItem>
-                        <SelectItem value="Innova Crysta">Innova Crysta</SelectItem>
-                        <SelectItem value="11 Tempo Traveller">11 Tempo Traveller</SelectItem>
-                        <SelectItem value="12 Seater Tempo Traveller">12 Seater Tempo Traveller</SelectItem>
-                        <SelectItem value="14 Seater Tempo Traveller">14 Seater Tempo Traveller</SelectItem>
-                        <SelectItem value="17 Seater Tempo Traveller">17 Seater Tempo Traveller</SelectItem>
-                        <SelectItem value="22 seater AC PREMIUM BUS">22 seater AC PREMIUM BUS</SelectItem>
-                        <SelectItem value="26 SEATER AC PREMIUM BUS">26 SEATER AC PREMIUM BUS</SelectItem>
-                        <SelectItem value="35 SEATER AC PREMIUM BUS">35 SEATER AC PREMIUM BUS</SelectItem>
-                        <SelectItem value="40 SEATER AC PREMIUM BUS">40 SEATER AC PREMIUM BUS</SelectItem>
-                        <SelectItem value="URBANIA - 16 SEATER">URBANIA - 16 SEATER</SelectItem>
-                        <SelectItem value="AC BOLERO">AC BOLERO</SelectItem>
-                        <SelectItem value="TATA SUMO">TATA SUMO</SelectItem>
-                        <SelectItem value="BOLERO">BOLERO</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <datalist id="enquiry-vehicles-list">
+                      <option value="WAGNOR" />
+                      <option value="Sedan - Swift Dzire" />
+                      <option value="Innova / Xylo" />
+                      <option value="Innova Crysta" />
+                      <option value="11 Tempo Traveller" />
+                      <option value="12 Seater Tempo Traveller" />
+                      <option value="14 Seater Tempo Traveller" />
+                      <option value="17 Seater Tempo Traveller" />
+                      <option value="22 seater AC PREMIUM BUS" />
+                      <option value="26 SEATER AC PREMIUM BUS" />
+                      <option value="35 SEATER AC PREMIUM BUS" />
+                      <option value="40 SEATER AC PREMIUM BUS" />
+                      <option value="URBANIA - 16 SEATER" />
+                      <option value="AC BOLERO" />
+                      <option value="TATA SUMO" />
+                      <option value="BOLERO" />
+                      <option value="Coaster bus" />
+                      <option value="Hiace bus" />
+                      <option value="High Roof Coaster" />
+                      <option value="SUV" />
+                      <option value="CRETA" />
+                      <option value="BYD" />
+                    </datalist>
+                    <Input required list="enquiry-vehicles-list" className="bg-transparent border-gray-200/80 shadow-none h-10 rounded-[12px] text-[14px]" value={vehicle} onChange={(e) => setVehicle(e.target.value as VehicleType)} placeholder="Select or type vehicle" />
                   </div>
                 </div>
               </div>
