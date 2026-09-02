@@ -47,12 +47,18 @@ import {
 
 // Helper to check if Firebase is configured with real credentials
 const isFirebaseConfigured = (): boolean => {
-  return !!(
+  const isConfigured = !!(
     process.env.NEXT_PUBLIC_FIREBASE_API_KEY &&
     process.env.NEXT_PUBLIC_FIREBASE_API_KEY !== 'demo-api-key' &&
     process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID &&
     process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID !== 'demo-himalayan-project'
   );
+  if (!isConfigured) {
+    console.warn("⚠️ FIREBASE NOT CONFIGURED. Falling back to local storage. API_KEY length:", process.env.NEXT_PUBLIC_FIREBASE_API_KEY?.length, "PROJECT_ID:", process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID);
+  } else {
+    console.log("✅ FIREBASE IS CONFIGURED. Project:", process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID);
+  }
+  return isConfigured;
 };
 
 // Generic helper for localStorage synchronization in dev/demo mode
@@ -69,6 +75,7 @@ const getLocalData = <T>(key: string, fallback: T): T => {
 const setLocalData = <T>(key: string, data: T): void => {
   if (typeof window === 'undefined') return;
   try {
+    console.warn(`💾 SAVING ${key} TO LOCAL STORAGE INSTEAD OF FIREBASE!`);
     window.localStorage.setItem(`hfm-db-${key}`, JSON.stringify(data));
   } catch (e) {
     console.error('Failed to save local DB data:', e);
@@ -81,9 +88,7 @@ export class FleetDatabase {
     if (isFirebaseConfigured() && db) {
       try {
         const snap = await getDocs(collection(db, 'vehicles'));
-        if (!snap.empty) {
-          return snap.docs.map((d) => ({ id: d.id, ...d.data() } as Vehicle));
-        }
+        return snap.docs.map((d) => ({ id: d.id, ...d.data() } as Vehicle));
       } catch (e) {
         console.warn('Firestore fetch failed, falling back to local DB:', e);
       }
@@ -130,9 +135,7 @@ export class FleetDatabase {
     if (isFirebaseConfigured() && db) {
       try {
         const snap = await getDocs(collection(db, 'drivers'));
-        if (!snap.empty) {
-          return snap.docs.map((d) => ({ id: d.id, ...d.data() } as Driver));
-        }
+        return snap.docs.map((d) => ({ id: d.id, ...d.data() } as Driver));
       } catch (e) {
         console.warn('Firestore fetch failed:', e);
       }
@@ -177,9 +180,7 @@ export class FleetDatabase {
     if (isFirebaseConfigured() && db) {
       try {
         const snap = await getDocs(collection(db, 'corporate_clients'));
-        if (!snap.empty) {
-          return snap.docs.map((d) => ({ id: d.id, ...d.data() } as CorporateClient));
-        }
+        return snap.docs.map((d) => ({ id: d.id, ...d.data() } as CorporateClient));
       } catch (e) {
         console.warn('Firestore error:', e);
       }
@@ -224,9 +225,7 @@ export class FleetDatabase {
     if (isFirebaseConfigured() && db) {
       try {
         const snap = await getDocs(collection(db, 'enquiries'));
-        if (!snap.empty) {
-          return snap.docs.map((d) => ({ id: d.id, ...d.data() } as Enquiry));
-        }
+        return snap.docs.map((d) => ({ id: d.id, ...d.data() } as Enquiry));
       } catch (e) {
         console.warn('Firestore error:', e);
       }
@@ -271,9 +270,7 @@ export class FleetDatabase {
     if (isFirebaseConfigured() && db) {
       try {
         const snap = await getDocs(collection(db, 'bookings'));
-        if (!snap.empty) {
-          return snap.docs.map((d) => ({ id: d.id, ...d.data() } as Booking));
-        }
+        return snap.docs.map((d) => ({ id: d.id, ...d.data() } as Booking));
       } catch (e) {
         console.warn('Firestore error:', e);
       }
@@ -318,9 +315,7 @@ export class FleetDatabase {
     if (isFirebaseConfigured() && db) {
       try {
         const snap = await getDocs(collection(db, 'quotations'));
-        if (!snap.empty) {
-          return snap.docs.map((d) => ({ id: d.id, ...d.data() } as Quotation));
-        }
+        return snap.docs.map((d) => ({ id: d.id, ...d.data() } as Quotation));
       } catch (e) {
         console.warn('Firestore error:', e);
       }
