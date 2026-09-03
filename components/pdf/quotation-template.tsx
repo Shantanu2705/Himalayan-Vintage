@@ -32,8 +32,8 @@ function numberToWords(num: number): string {
 
 export const QuotationPdfTemplate: React.FC<QuotationPdfTemplateProps> = ({ quotation, settings }) => {
   const companyName = settings?.companyName || 'Himalayan Vintage Holidays';
-  const companyAddress = settings?.companyAddress || settings?.address || 'Ashok Nagar, bagdogra  P.O - bagdogra, Dist. - Darjeeling - 734014';
-  const companyContact = settings?.phone || settings?.whatsappNumber || '9851544861';
+  const companyAddress = settings?.companyAddress || settings?.address || 'Ashok Nagar, bagdogra P.O - bagdogra, Dist. - Darjeeling - 734014';
+  const companyContact = settings?.phone || settings?.whatsappNumber || '+91 9851544861';
   const companyEmail = settings?.email || settings?.supportEmail || 'query@himalayantaxi.com';
   const gstin = settings?.companyGstin || settings?.gstin || '19AQWPB8639C2ZE';
 
