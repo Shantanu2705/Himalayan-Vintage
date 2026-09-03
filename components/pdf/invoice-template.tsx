@@ -62,11 +62,11 @@ export const InvoicePdfTemplate: React.FC<InvoicePdfTemplateProps> = ({ invoice,
             {settings?.companyName || 'Himalayan Vintage Holidays'}
           </h2>
           <p className="text-[11px] text-slate-600 mt-1 max-w-[200px] leading-snug">
-            {settings?.address || 'MG Marg, Gangtok, Sikkim — 737101'}
+            {settings?.companyAddress || settings?.address || 'Ashok Nagar, bagdogra  P.O - bagdogra, Dist. - Darjeeling - 734014'}
           </p>
           <div className="mt-2 text-[10px] font-mono space-y-0.5 text-slate-500">
-            <div>Phone: {settings?.phone || '+91 98300 12345'}</div>
-            <div>Email: {settings?.email || 'booking@himalayan.co'}</div>
+            <div>Phone: {settings?.phone || settings?.whatsappNumber || '9851544861'}</div>
+            <div>Email: {settings?.email || settings?.supportEmail || 'booking@himalayan.co'}</div>
             {settings?.gstin && <div>GSTIN: {settings?.gstin}</div>}
           </div>
         </div>

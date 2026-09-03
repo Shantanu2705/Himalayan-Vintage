@@ -346,7 +346,7 @@ function SmartQuotationBuilderForm() {
                 <Check className="h-4 w-4 mr-2" /> Save Quotation
               </button>
             )}
-            <button onClick={() => window.open('https://wa.me/919851544861', '_blank')} className="h-9 px-4 rounded-full border border-gray-200 bg-white/50 flex items-center text-[13px] font-semibold text-gray-700 hover:bg-white transition-colors">
+            <button onClick={() => window.open(`https://wa.me/${settings?.whatsappNumber || settings?.phone || '919851544861'}`, '_blank')} className="h-9 px-4 rounded-full border border-gray-200 bg-white/50 flex items-center text-[13px] font-semibold text-gray-700 hover:bg-white transition-colors">
               <MessageCircle className="h-3.5 w-3.5 mr-2" /> WhatsApp
             </button>
             <button className="h-9 px-4 rounded-full border border-gray-200 bg-white/50 flex items-center text-[13px] font-semibold text-gray-700 hover:bg-white transition-colors">

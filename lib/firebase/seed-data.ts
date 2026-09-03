@@ -72,7 +72,8 @@ export const initialSettings: CompanySettings = {
   qrCodeUrl: '',
   companyGstin: '19AQWPB8639C2ZE',
   companyState: 'West Bengal',
-  companyAddress: 'Bagdogra, West Bengal, India',
+  companyAddress: 'Ashok Nagar, bagdogra  P.O - bagdogra, Dist. - Darjeeling - 734014',
+  phone: '9851544861',
   companyPan: '',
   cancellationPolicy: ``
 };

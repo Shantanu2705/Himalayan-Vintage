@@ -32,10 +32,10 @@ function numberToWords(num: number): string {
 
 export const QuotationPdfTemplate: React.FC<QuotationPdfTemplateProps> = ({ quotation, settings }) => {
   const companyName = settings?.companyName || 'Himalayan Vintage Holidays';
-  const companyAddress = settings?.address || 'Bagdogra, West Bengal, India';
-  const companyContact = settings?.phone || '+91 98515 44861';
-  const companyEmail = settings?.email || 'query@himalayantaxi.com';
-  const gstin = settings?.gstin || '19AQWPB8639C2ZE';
+  const companyAddress = settings?.companyAddress || settings?.address || 'Ashok Nagar, bagdogra  P.O - bagdogra, Dist. - Darjeeling - 734014';
+  const companyContact = settings?.phone || settings?.whatsappNumber || '9851544861';
+  const companyEmail = settings?.email || settings?.supportEmail || 'query@himalayantaxi.com';
+  const gstin = settings?.companyGstin || settings?.gstin || '19AQWPB8639C2ZE';
 
   const cabSummary = quotation.vehicles?.length > 0 
     ? quotation.vehicles.map((v: any) => `${v.qty || 1} ${v.vehicle}`).join(', ')
