@@ -12,9 +12,9 @@ export const ReceiptPdfTemplate: React.FC<ReceiptPdfTemplateProps> = ({ receipt,
     <div className="space-y-8 text-[13px] font-sans text-black">
 
       {/* Header */}
-      <div className="grid grid-cols-3 items-start border-b-2 border-primary pb-6 gap-4">
+      <div className="flex justify-between items-start border-b-2 border-primary pb-6 gap-4">
         {/* Left: Logo */}
-        <div className="flex justify-start">
+        <div className="flex justify-start shrink-0">
           {settings?.logoUrl ? (
             <img src={settings.logoUrl} alt="Company Logo" className="h-28 w-auto max-w-[240px] object-contain mix-blend-multiply" />
           ) : (
@@ -24,25 +24,24 @@ export const ReceiptPdfTemplate: React.FC<ReceiptPdfTemplateProps> = ({ receipt,
           )}
         </div>
 
-        {/* Middle: Document Title */}
-        <div className="flex flex-col items-center justify-center text-center mt-2">
-          <div className="text-xl font-extrabold text-primary uppercase tracking-wider">OFFICIAL RECEIPT</div>
-          <div className="text-sm font-mono font-bold mt-2 text-slate-800">Receipt No: {receipt.receiptNo}</div>
-          <div className="text-xs text-slate-500 mt-0.5">Date: {formatDate(receipt.date || new Date().toISOString())}</div>
-        </div>
-
-        {/* Right: Company Details */}
+        {/* Right: Company & Receipt Details */}
         <div className="flex flex-col items-end text-right">
-          <h2 className="text-lg font-extrabold tracking-tight uppercase text-primary">
+          <h2 className="text-lg font-extrabold tracking-tight uppercase text-primary whitespace-nowrap">
             {settings?.companyName || 'Himalayan Vintage Holidays'}
           </h2>
-          <p className="text-[11px] text-slate-600 mt-1 max-w-[200px] leading-snug">
+          <p className="text-[11px] text-slate-600 mt-1 max-w-[350px] leading-snug">
             {settings?.companyAddress || settings?.address || 'Ashok Nagar, bagdogra P.O - bagdogra, Dist. - Darjeeling - 734014'}
           </p>
-          <div className="mt-2 text-[10px] font-mono space-y-0.5 text-slate-500">
+          <div className="mt-1 text-[10px] font-mono space-y-0.5 text-slate-500">
             <div>Phone: {settings?.phone || settings?.whatsappNumber || '+91 9851544861'}</div>
             <div>Email: {settings?.email || settings?.supportEmail || 'booking@himalayan.co'}</div>
             {settings?.gstin && <div>GSTIN: {settings?.gstin}</div>}
+          </div>
+          <div className="mt-3 text-sm font-mono font-bold text-slate-800">
+            Receipt No: {receipt.receiptNo}
+          </div>
+          <div className="text-xs text-slate-500 mt-0.5">
+            Date: {formatDate(receipt.date || new Date().toISOString())}
           </div>
         </div>
       </div>
