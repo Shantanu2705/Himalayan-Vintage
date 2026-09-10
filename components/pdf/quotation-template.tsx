@@ -86,7 +86,7 @@ export const QuotationPdfTemplate: React.FC<QuotationPdfTemplateProps> = ({ quot
           {quotation.itinerary.map((item: any, idx: number) => (
             <div key={idx}>
               <div className="inline-block bg-yellow-300 font-bold mb-1 px-1">
-                Day {String(idx + 1).padStart(2, '0')}: {item.title || `Day ${idx + 1}`}
+                Day {idx + 1}:
               </div>
               <div className="text-justify text-[#0c2f5d]">
                 {item.desc || item.description}
@@ -147,25 +147,56 @@ export const QuotationPdfTemplate: React.FC<QuotationPdfTemplateProps> = ({ quot
         </div>
       )}
 
-      {/* Terms and Conditions / Remarks */}
-      {(quotation.terms || quotation.remarks) && (
-        <div className="space-y-4 mt-6 text-[#0c2f5d] break-before-auto">
-          {quotation.terms && (
+      {/* Additional Details & Notes */}
+      {(quotation.additionalDetails || quotation.additionalNotes || quotation.pickupTiming || quotation.dropTiming || quotation.driverInstructions || quotation.vehicleNotes) && (
+        <div className="space-y-4 mt-6 text-[#0c2f5d]">
+          {quotation.additionalDetails && (
             <div>
-              <div className="font-bold underline mb-1">Terms & Condition:</div>
+              <div className="font-bold underline mb-1">Additional Details:</div>
+              <div className="text-justify">{quotation.additionalDetails}</div>
+            </div>
+          )}
+          
+          {(quotation.pickupTiming || quotation.dropTiming || quotation.driverInstructions || quotation.vehicleNotes) && (
+            <div>
+              <div className="font-bold underline mb-1">Transport Details:</div>
               <ul className="list-disc pl-8 space-y-1">
-                {quotation.terms.split('\n').filter((t: string) => t.trim() !== '').map((term: string, idx: number) => (
-                  <li key={idx} className="text-justify">{term.trim().replace(/^[-•]\s*/, '')}</li>
-                ))}
+                {quotation.pickupTiming && <li><strong>Pickup Timing:</strong> {quotation.pickupTiming}</li>}
+                {quotation.dropTiming && <li><strong>Drop Timing:</strong> {quotation.dropTiming}</li>}
+                {quotation.driverInstructions && <li><strong>Driver Instructions:</strong> {quotation.driverInstructions}</li>}
+                {quotation.vehicleNotes && <li><strong>Vehicle Notes:</strong> {quotation.vehicleNotes}</li>}
               </ul>
             </div>
           )}
+
+          {quotation.additionalNotes && (
+            <div>
+              <div className="font-bold underline mb-1">Additional Notes:</div>
+              <div className="text-justify">{quotation.additionalNotes}</div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Terms and Conditions / Remarks */}
+      {(quotation.terms || quotation.remarks) && (
+        <div className="space-y-4 mt-6 text-[#0c2f5d] break-before-auto">
           {quotation.remarks && (
             <div>
               <div className="font-bold underline mb-1">Payment Mode / Remarks:</div>
               <ul className="list-disc pl-8 space-y-1">
                 {quotation.remarks.split('\n').filter((t: string) => t.trim() !== '').map((remark: string, idx: number) => (
                   <li key={idx} className="text-justify">{remark.trim().replace(/^[-•]\s*/, '')}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {quotation.terms && (
+            <div>
+              <div className="font-bold underline mb-1">Terms & Condition:</div>
+              <ul className="list-disc pl-8 space-y-1">
+                {quotation.terms.split('\n').filter((t: string) => t.trim() !== '').map((term: string, idx: number) => (
+                  <li key={idx} className="text-justify">{term.trim().replace(/^[-•]\s*/, '')}</li>
                 ))}
               </ul>
             </div>
