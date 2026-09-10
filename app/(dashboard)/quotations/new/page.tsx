@@ -130,16 +130,16 @@ function SmartQuotationBuilderForm() {
         setStatus(quote.status || 'Draft');
         setQType(quote.qType || quote.type || 'Tour package');
         
-        if (quote.itinerary && quote.itinerary.length > 0) setItinerary(quote.itinerary);
+        if (quote.itinerary && quote.itinerary.length > 0) setItinerary(JSON.parse(JSON.stringify(quote.itinerary)));
         
         if (quote.vehicles && quote.vehicles.length > 0) {
-          setVehicles(quote.vehicles);
+          setVehicles(JSON.parse(JSON.stringify(quote.vehicles)));
         } else {
           setVehicles([{ id: 'v1', vehicle: quote.vehicle || 'Sedan', qty: 1, days: quote.days || 1, rate: quote.baseAmount || 0, packagePrice: '', total: quote.baseAmount || 0, tbd1: '', tbd2: '', driverDetails: '' }]);
         }
         
         if (quote.rateCard) {
-          setRateCard(quote.rateCard);
+          setRateCard({ ...quote.rateCard });
         } else {
           setRateCard({
             perKm: 0, perHour: 0, extraKm: 0, extraHour: 0,
@@ -150,10 +150,10 @@ function SmartQuotationBuilderForm() {
         }
         
         if (quote.advancePercent !== undefined) setAdvancePercent(quote.advancePercent);
-        if (quote.inclusions) setInclusions(quote.inclusions);
-        if (quote.exclusions) setExclusions(quote.exclusions);
-        if (quote.permits) setPermits(quote.permits);
-        if (quote.extraSightseeing) setExtraSightseeing(quote.extraSightseeing);
+        if (quote.inclusions) setInclusions([...quote.inclusions]);
+        if (quote.exclusions) setExclusions([...quote.exclusions]);
+        if (quote.permits) setPermits([...quote.permits]);
+        if (quote.extraSightseeing) setExtraSightseeing([...quote.extraSightseeing]);
         
         setAdditionalDetails(quote.additionalDetails || '');
         setPickupTiming(quote.pickupTiming || '');
