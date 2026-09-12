@@ -32,13 +32,12 @@ function numberToWords(num: number): string {
 
 export const QuotationPdfTemplate: React.FC<QuotationPdfTemplateProps> = ({ quotation, settings }) => {
   const companyName = settings?.companyName || 'Himalayan Vintage Holidays';
-  const companyAddress = settings?.companyAddress || settings?.address || 'Ashok Nagar, bagdogra P.O - bagdogra, Dist. - Darjeeling - 734014';
+  const companyAddress = settings?.companyAddress || settings?.address || 'Ashok Nagar, bagdogra,Darjeeling - 734014';
   const companyContact = settings?.phone || settings?.whatsappNumber || '+91 9851544861';
   const companyEmail = settings?.email || settings?.supportEmail || 'query@himalayantaxi.com';
-  const gstin = settings?.companyGstin || settings?.gstin || '19AQWPB8639C2ZE';
 
   const cabSummary = quotation.vehicles?.length > 0 
-    ? quotation.vehicles.map((v: any) => `${v.qty || 1} ${v.vehicle}`).join(', ')
+    ? quotation.vehicles.map((v: any) => `${v.vehicle} X ${String(v.qty || 1).padStart(2, '0')}`).join(', ')
     : 'Not Specified';
 
   return (
@@ -61,8 +60,8 @@ export const QuotationPdfTemplate: React.FC<QuotationPdfTemplateProps> = ({ quot
         <div className="text-right">
           <h2 className="text-xl font-bold text-[#0c2f5d] m-0">{companyName}</h2>
           <div className="font-bold text-sm text-[#0c2f5d]">{companyAddress}</div>
-          <div className="font-bold text-sm text-[#0c2f5d]">Contact : {companyContact}, {companyEmail}</div>
-          <div className="font-bold text-sm text-[#0c2f5d]">GST IN : {gstin}</div>
+          <div className="font-bold text-sm text-[#0c2f5d]">Contact : {companyContact}</div>
+          <div className="font-bold text-sm text-[#0c2f5d]">Email: {companyEmail}</div>
         </div>
       </div>
 
@@ -86,7 +85,7 @@ export const QuotationPdfTemplate: React.FC<QuotationPdfTemplateProps> = ({ quot
           {quotation.itinerary.map((item: any, idx: number) => (
             <div key={idx}>
               <div className="inline-block bg-yellow-300 font-bold mb-1 px-1">
-                Day {idx + 1}:
+                Day: {idx + 1} {item.heading ? `[${item.heading}]` : ''}
               </div>
               <div className="text-justify text-[#0c2f5d]">
                 {item.desc || item.description}

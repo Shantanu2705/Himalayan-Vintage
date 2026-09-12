@@ -36,6 +36,7 @@ function SmartQuotationBuilderForm() {
 
   const [status, setStatus] = useState('Draft');
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [quotationDate, setQuotationDate] = useState(new Date().toISOString().split('T')[0]);
   
   // Section 1 & 2
   const [qType, setQType] = useState('Tour package');
@@ -53,10 +54,10 @@ function SmartQuotationBuilderForm() {
 
   // Itinerary
   const [itinerary, setItinerary] = useState([
-    { id: '1', title: 'Arrival at Siliguri', desc: 'Pickup and transfer to Pelling.' },
-    { id: '2', title: 'Sightseeing Day 2', desc: 'Full-day sightseeing.' },
-    { id: '3', title: 'Sightseeing Day 3', desc: 'Full-day sightseeing.' },
-    { id: '4', title: 'Departure from Siliguri', desc: 'Full-day sightseeing.' },
+    { id: '1', title: 'Arrival at Siliguri', desc: 'Pickup and transfer to Pelling.', heading: '' },
+    { id: '2', title: 'Sightseeing Day 2', desc: 'Full-day sightseeing.', heading: '' },
+    { id: '3', title: 'Sightseeing Day 3', desc: 'Full-day sightseeing.', heading: '' },
+    { id: '4', title: 'Departure from Siliguri', desc: 'Full-day sightseeing.', heading: '' },
   ]);
 
   // Vehicles
@@ -129,6 +130,10 @@ function SmartQuotationBuilderForm() {
         if (quote.packageDuration) setPackageDuration(quote.packageDuration);
         setStatus(quote.status || 'Draft');
         setQType(quote.qType || quote.type || 'Tour package');
+        
+        if (quote.date || quote.createdAt) {
+          setQuotationDate(new Date(quote.date || quote.createdAt).toISOString().split('T')[0]);
+        }
         
         if (quote.itinerary && quote.itinerary.length > 0) setItinerary(JSON.parse(JSON.stringify(quote.itinerary)));
         
@@ -204,7 +209,8 @@ function SmartQuotationBuilderForm() {
           newItinerary.push({
             id: Date.now().toString() + i,
             title: `Day ${i + 1}`,
-            desc: ''
+            desc: '',
+            heading: ''
           });
         }
         return newItinerary;
@@ -257,6 +263,7 @@ function SmartQuotationBuilderForm() {
       totalAmount: grandTotal,
       grandTotal: grandTotal,
       gstAmount: gstAmount,
+      date: new Date(quotationDate).toISOString(),
       ...(enquiryId ? { enquiryId } : {})
     };
 
@@ -270,7 +277,6 @@ function SmartQuotationBuilderForm() {
       addQuotation({
         id: 'q-' + Date.now(),
         quotationNo: newNo,
-        date: new Date().toISOString(),
         ...payload
       } as any);
     }
@@ -370,6 +376,7 @@ function SmartQuotationBuilderForm() {
               quotation={{
                 id: editId || 'NEW',
                 quotationNo: editId ? quotations.find(q => q.id === editId)?.quotationNo : undefined,
+                date: new Date(quotationDate).toISOString(),
                 clientName: customerName,
                 customerName: customerName,
                 clientPhone: mobile,
@@ -446,6 +453,10 @@ function SmartQuotationBuilderForm() {
                     <SelectItem value="Cancelled">Cancelled</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+              <div className="flex items-center gap-2">
+                <Label className="text-[12px] font-bold text-gray-700">Date:</Label>
+                <Input type="date" className="h-8 w-[130px] border font-bold text-[12px] rounded-full" value={quotationDate} onChange={e => setQuotationDate(e.target.value)} />
               </div>
             </div>
           </div>
@@ -563,7 +574,7 @@ function SmartQuotationBuilderForm() {
                 <h2 className="text-[17px] font-bold text-[#1e293b]">Day-wise itinerary</h2>
                 <p className="text-[12px] text-gray-500 font-medium">First day auto-suggests arrival at {pickup || 'location'}; last day departure. All editable.</p>
               </div>
-              <Button onClick={() => setItinerary([...itinerary, { id: Date.now().toString(), title: '', desc: '' }])} variant="outline" className="h-9 px-4 rounded-full bg-[#e5fcf0] border-[#e5fcf0] text-[#064e3b] font-bold hover:bg-[#d1fae5] shadow-none transition-colors">
+              <Button onClick={() => setItinerary([...itinerary, { id: Date.now().toString(), title: '', desc: '', heading: '' }])} variant="outline" className="h-9 px-4 rounded-full bg-[#e5fcf0] border-[#e5fcf0] text-[#064e3b] font-bold hover:bg-[#d1fae5] shadow-none transition-colors">
                 <Plus className="h-4 w-4 mr-1.5" /> Add day
               </Button>
             </div>
@@ -585,6 +596,14 @@ function SmartQuotationBuilderForm() {
                   <div className="border border-gray-200 rounded-[16px] overflow-hidden bg-white group transition-colors shadow-[0_2px_4px_0_rgba(0,0,0,0.01)]">
                     <div className="flex items-center px-4 py-2 border-b border-gray-100">
                       <span className="font-bold text-[15px] text-gray-800 flex-1">Day {idx + 1}</span>
+                      <Input 
+                        placeholder="Day heading..." 
+                        className="h-8 w-64 text-[13px] mr-2" 
+                        value={day.heading || ''} 
+                        onChange={e => {
+                          const newI = [...itinerary]; newI[idx].heading = e.target.value; setItinerary(newI);
+                        }} 
+                      />
                       <button onClick={() => setItinerary(itinerary.filter(i => i.id !== day.id))} className="text-red-400 hover:text-red-600 p-2 transition-opacity ml-2">
                         <Trash2 className="h-4 w-4" />
                       </button>

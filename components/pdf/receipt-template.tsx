@@ -30,12 +30,11 @@ export const ReceiptPdfTemplate: React.FC<ReceiptPdfTemplateProps> = ({ receipt,
             {settings?.companyName || 'Himalayan Vintage Holidays'}
           </h2>
           <p className="text-[11px] text-slate-600 mt-1 max-w-[350px] leading-snug">
-            {settings?.companyAddress || settings?.address || 'Ashok Nagar, bagdogra P.O - bagdogra, Dist. - Darjeeling - 734014'}
+            {settings?.companyAddress || settings?.address || 'Ashok Nagar, bagdogra,Darjeeling - 734014'}
           </p>
           <div className="mt-1 text-[10px] font-mono space-y-0.5 text-slate-500">
             <div>Phone: {settings?.phone || settings?.whatsappNumber || '+91 9851544861'}</div>
             <div>Email: {settings?.email || settings?.supportEmail || 'booking@himalayan.co'}</div>
-            {settings?.gstin && <div>GSTIN: {settings?.gstin}</div>}
           </div>
           <div className="mt-3 text-sm font-mono font-bold text-slate-800">
             Receipt No: {receipt.receiptNo}
