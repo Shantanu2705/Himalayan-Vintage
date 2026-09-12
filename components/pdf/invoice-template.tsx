@@ -54,7 +54,10 @@ export const InvoicePdfTemplate: React.FC<InvoicePdfTemplateProps> = ({ invoice,
             {settings?.companyName || 'Himalayan Vintage Holidays'}
           </h2>
           <p className="text-[11px] text-slate-600 mt-1 max-w-[350px] leading-snug">
-            {settings?.companyAddress || settings?.address || 'Ashok Nagar, bagdogra,Darjeeling - 734014'}
+            {(() => {
+              const addr = settings?.companyAddress || settings?.address || '';
+              return addr.includes('bagdogra P.O') ? 'Ashok Nagar, bagdogra,Darjeeling - 734014' : (addr || 'Ashok Nagar, bagdogra,Darjeeling - 734014');
+            })()}
           </p>
           <div className="mt-1 text-[10px] font-mono space-y-0.5 text-slate-500">
             <div>Phone: {settings?.phone || settings?.whatsappNumber || '+91 9851544861'}</div>
