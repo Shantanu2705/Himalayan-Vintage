@@ -37,6 +37,7 @@ export const Sidebar: React.FC<{ className?: string; onCloseMobile?: () => void 
     { title: 'Quotations', href: '/quotations', icon: FileText },
     { title: 'Billing', href: '/billing', icon: Receipt },
     { title: 'Reports', href: '/reports', icon: BarChart3 },
+    { title: 'Templates', href: '/templates', icon: FileText },
     { title: 'Settings', href: '/settings', icon: Settings },
   ];
 

@@ -24,6 +24,7 @@ import {
   initialNotifications,
   initialSettings,
   initialSerialCounters,
+  initialItineraryTemplates,
 } from '@/lib/firebase/seed-data';
 import {
   Vehicle,
@@ -43,6 +44,7 @@ import {
   SerialCounters,
   Invoice,
   Receipt,
+  ItineraryTemplate,
 } from '@/types';
 
 // Helper to check if Firebase is configured with real credentials
@@ -694,6 +696,7 @@ export class FleetDatabase {
       for (const s of initialSightseeings) { await setDoc(doc(db, 'sightseeings', s.id), s); count++; }
       for (const inc of initialInclusions) { await setDoc(doc(db, 'inclusions', inc.id), inc); count++; }
       for (const exc of initialExclusions) { await setDoc(doc(db, 'exclusions', exc.id), exc); count++; }
+      for (const tpl of initialItineraryTemplates) { await setDoc(doc(db, 'itinerary_templates', tpl.id), tpl); count++; }
       await setDoc(doc(db, 'settings', 'company'), initialSettings); count++;
       return { success: true, count, message: `Successfully seeded ${count} documents to live Firestore database!` };
     } catch (e: any) {
@@ -701,4 +704,37 @@ export class FleetDatabase {
       return { success: false, count: 0, message: e.message || 'Error occurred during database seeding.' };
     }
   }
+
+  // --- ITINERARY TEMPLATES ---
+  static async getItineraryTemplates(): Promise<ItineraryTemplate[]> {
+    if (isFirebaseConfigured() && db) {
+      try {
+        const snap = await getDocs(collection(db, 'itinerary_templates'));
+        if (!snap.empty) return snap.docs.map((d) => ({ id: d.id, ...d.data() } as ItineraryTemplate));
+      } catch (e) { console.warn('Firestore error:', e); }
+    }
+    return getLocalData<ItineraryTemplate[]>('itinerary_templates', initialItineraryTemplates);
+  }
+
+  static async upsertItineraryTemplate(template: ItineraryTemplate): Promise<ItineraryTemplate> {
+    const id = template.id || `tpl-${Date.now()}`;
+    const newTemplate = { ...template, id };
+    if (isFirebaseConfigured() && db) {
+      try { await setDoc(doc(db, 'itinerary_templates', id), newTemplate); return newTemplate; } catch (e) { console.warn('Firestore error:', e); }
+    }
+    const current = getLocalData<ItineraryTemplate[]>('itinerary_templates', initialItineraryTemplates);
+    const idx = current.findIndex((t) => t.id === id);
+    if (idx >= 0) current[idx] = newTemplate; else current.unshift(newTemplate);
+    setLocalData('itinerary_templates', current);
+    return newTemplate;
+  }
+
+  static async deleteItineraryTemplate(id: string): Promise<void> {
+    if (isFirebaseConfigured() && db) {
+      try { await deleteDoc(doc(db, 'itinerary_templates', id)); return; } catch (e) { console.warn('Firestore error:', e); }
+    }
+    const current = getLocalData<ItineraryTemplate[]>('itinerary_templates', initialItineraryTemplates);
+    setLocalData('itinerary_templates', current.filter((t) => t.id !== id));
+  }
 }
+

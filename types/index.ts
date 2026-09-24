@@ -141,6 +141,13 @@ export interface ItineraryDay {
   description: string;
 }
 
+export interface ItineraryTemplate {
+  id: string;
+  name: string;
+  days: number;
+  itinerary: ItineraryItem[];
+}
+
 export interface QuotationVehicle {
   id: string;
   category?: VehicleCategory;

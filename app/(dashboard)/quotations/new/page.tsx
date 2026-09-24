@@ -32,7 +32,7 @@ function SmartQuotationBuilderForm() {
   const enquiryId = searchParams.get('enquiryId');
   const editId = searchParams.get('editId');
   
-  const { enquiries, quotations, updateQuotation, addQuotation, deleteQuotation, settings } = useFleetStore();
+  const { enquiries, quotations, updateQuotation, addQuotation, deleteQuotation, settings, itineraryTemplates } = useFleetStore();
 
   const [status, setStatus] = useState('Draft');
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
@@ -574,9 +574,39 @@ function SmartQuotationBuilderForm() {
                 <h2 className="text-[17px] font-bold text-[#1e293b]">Day-wise itinerary</h2>
                 <p className="text-[12px] text-gray-500 font-medium">First day auto-suggests arrival at {pickup || 'location'}; last day departure. All editable.</p>
               </div>
-              <Button onClick={() => setItinerary([...itinerary, { id: Date.now().toString(), title: '', desc: '', heading: '' }])} variant="outline" className="h-9 px-4 rounded-full bg-[#e5fcf0] border-[#e5fcf0] text-[#064e3b] font-bold hover:bg-[#d1fae5] shadow-none transition-colors">
-                <Plus className="h-4 w-4 mr-1.5" /> Add day
-              </Button>
+              <div className="flex items-center gap-3">
+                <Select onValueChange={(val) => {
+                  if(val) {
+                    const tpl = itineraryTemplates.find(t => t.id === val);
+                    if(tpl && tpl.itinerary) {
+                      setItinerary(tpl.itinerary.map((i: any, idx: number) => ({
+                        id: Date.now().toString() + '-' + idx,
+                        title: i.title,
+                        desc: i.description,
+                        heading: ''
+                      })));
+                      if(startDate) {
+                         const start = new Date(startDate);
+                         const end = new Date(start);
+                         end.setDate(start.getDate() + (tpl.days - 1));
+                         setEndDate(end.toISOString().split('T')[0]);
+                      }
+                    }
+                  }
+                }}>
+                  <SelectTrigger className="h-9 w-64 rounded-full border-gray-200 bg-white text-[13px] font-medium shadow-sm">
+                    <SelectValue placeholder="Load from Template..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {itineraryTemplates.map(t => (
+                      <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button onClick={() => setItinerary([...itinerary, { id: Date.now().toString(), title: '', desc: '', heading: '' }])} variant="outline" className="h-9 px-4 rounded-full bg-[#e5fcf0] border-[#e5fcf0] text-[#064e3b] font-bold hover:bg-[#d1fae5] shadow-none transition-colors">
+                  <Plus className="h-4 w-4 mr-1.5" /> Add day
+                </Button>
+              </div>
             </div>
             
             <div className="space-y-4">

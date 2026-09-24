@@ -16,6 +16,7 @@ import {
   ExclusionMaster,
   Notification,
   CompanySettings,
+  ItineraryTemplate,
 } from '@/types';
 import { FleetDatabase } from '@/services/db';
 
@@ -34,6 +35,7 @@ interface FleetState {
   sightseeings: SightseeingMaster[];
   inclusions: InclusionMaster[];
   exclusions: ExclusionMaster[];
+  itineraryTemplates: ItineraryTemplate[];
   notifications: Notification[];
   settings: CompanySettings | null;
   isLoading: boolean;
@@ -100,6 +102,11 @@ interface FleetState {
   updateExclusion: (e: ExclusionMaster) => Promise<void>;
   deleteExclusion: (id: string) => Promise<void>;
 
+  // Itinerary Templates CRUD
+  addItineraryTemplate: (t: ItineraryTemplate) => Promise<void>;
+  updateItineraryTemplate: (t: ItineraryTemplate) => Promise<void>;
+  deleteItineraryTemplate: (id: string) => Promise<void>;
+
   // Settings
   updateSettings: (s: Partial<CompanySettings>) => Promise<void>;
   markNotificationRead: (id: string) => void;
@@ -120,6 +127,7 @@ export const useFleetStore = create<FleetState>((set, get) => ({
   sightseeings: [],
   inclusions: [],
   exclusions: [],
+  itineraryTemplates: [],
   notifications: [],
   settings: null,
   isLoading: true,
@@ -144,6 +152,7 @@ export const useFleetStore = create<FleetState>((set, get) => ({
         sightseeings,
         inclusions,
         exclusions,
+        itineraryTemplates,
         notifications,
         settings,
       ] = await Promise.all([
@@ -161,6 +170,7 @@ export const useFleetStore = create<FleetState>((set, get) => ({
         FleetDatabase.getSightseeings(),
         FleetDatabase.getInclusions(),
         FleetDatabase.getExclusions(),
+        FleetDatabase.getItineraryTemplates(),
         FleetDatabase.getNotifications(),
         FleetDatabase.getSettings(),
       ]);
@@ -180,6 +190,7 @@ export const useFleetStore = create<FleetState>((set, get) => ({
         sightseeings,
         inclusions,
         exclusions,
+        itineraryTemplates,
         notifications,
         settings,
         isLoading: false,
@@ -393,6 +404,19 @@ export const useFleetStore = create<FleetState>((set, get) => ({
   deleteExclusion: async (id) => {
     await FleetDatabase.deleteExclusion(id);
     set((s) => ({ exclusions: s.exclusions.filter((item) => item.id !== id) }));
+  },
+
+  addItineraryTemplate: async (t) => {
+    const saved = await FleetDatabase.upsertItineraryTemplate(t);
+    set((s) => ({ itineraryTemplates: [saved, ...s.itineraryTemplates] }));
+  },
+  updateItineraryTemplate: async (t) => {
+    const saved = await FleetDatabase.upsertItineraryTemplate(t);
+    set((s) => ({ itineraryTemplates: s.itineraryTemplates.map((item) => (item.id === saved.id ? saved : item)) }));
+  },
+  deleteItineraryTemplate: async (id) => {
+    await FleetDatabase.deleteItineraryTemplate(id);
+    set((s) => ({ itineraryTemplates: s.itineraryTemplates.filter((item) => item.id !== id) }));
   },
 
   markNotificationRead: (id) => {
