@@ -214,6 +214,7 @@ function SmartQuotationBuilderForm() {
           });
         }
         return newItinerary;
+      });
     }
   }, [startDate, endDate]);
 
