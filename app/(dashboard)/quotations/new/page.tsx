@@ -214,14 +214,6 @@ function SmartQuotationBuilderForm() {
           });
         }
         return newItinerary;
-      });
-
-      setVehicles(prev => prev.map(v => {
-        if (v.days !== diffDays) {
-          return { ...v, days: diffDays, total: v.qty * diffDays * v.rate };
-        }
-        return v;
-      }));
     }
   }, [startDate, endDate]);
 
