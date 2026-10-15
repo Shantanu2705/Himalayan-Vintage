@@ -20,6 +20,7 @@ import {
   ShieldCheck,
   ChevronRight,
   Bus,
+  FileSpreadsheet,
 } from 'lucide-react';
 
 export const Sidebar: React.FC<{ className?: string; onCloseMobile?: () => void }> = ({
@@ -33,6 +34,7 @@ export const Sidebar: React.FC<{ className?: string; onCloseMobile?: () => void 
   const navItems = [
     { title: 'Dashboard', href: '/', icon: LayoutDashboard },
     { title: 'Calendar', href: '/calendar', icon: CalendarCheck },
+    { title: 'Duty Register', href: '/duty-register', icon: FileSpreadsheet },
     { title: 'Enquiries', href: '/enquiries', icon: MessageSquareQuote },
     { title: 'Quotations', href: '/quotations', icon: FileText },
     { title: 'Billing', href: '/billing', icon: Receipt },
