@@ -1,5 +1,6 @@
 'use client';
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import Link from 'next/link';
 import { useDutyStore } from '@/lib/store/use-duty-store';
 import { DutyColumn, DutyRow } from '@/lib/duty-data';
 import { Button, cn } from '@/components/ui/button';
@@ -35,6 +36,7 @@ import {
   HelpCircle,
   ArrowDownToLine,
   Layers,
+  ArrowLeft,
 } from 'lucide-react';
 
 export default function DutyRegisterPage() {
@@ -290,9 +292,16 @@ export default function DutyRegisterPage() {
 
       {/* Top Banner / Actions Bar */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b pb-5">
-        <div>
+        <div className="space-y-1.5">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-green-950 dark:hover:text-green-300 transition-colors group mb-0.5"
+          >
+            <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" />
+            <span>Back to Home</span>
+          </Link>
           <div className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-green-900 text-white shadow-sm">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-green-900 text-white shadow-sm shrink-0">
               <FileSpreadsheet className="h-5 w-5" />
             </div>
             <div>
@@ -311,6 +320,18 @@ export default function DutyRegisterPage() {
 
         {/* Global Toolbar Buttons */}
         <div className="flex flex-wrap items-center gap-2">
+          <Link href="/">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-9 gap-1.5 border-gray-300 bg-white text-xs font-semibold text-gray-700 hover:bg-gray-100 hover:text-green-950 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200"
+              title="Return to Home Dashboard"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" />
+              <span>Back to Home</span>
+            </Button>
+          </Link>
+
           <input
             type="file"
             ref={fileInputRef}
