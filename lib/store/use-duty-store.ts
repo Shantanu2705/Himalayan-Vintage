@@ -3,7 +3,7 @@ import { create } from 'zustand';
 import { DutySheet, DutyRow, DutyColumn, INITIAL_DUTY_SHEETS } from '@/lib/duty-data';
 import { downloadDutyExcel, downloadDutyCsv, parseUploadedExcel } from '@/lib/duty-excel';
 
-const STORAGE_KEY = 'himalayan_fleet_duty_sheets_v1';
+const STORAGE_KEY = 'himalayan_fleet_duty_sheets_v2';
 
 interface DutyState {
   sheets: DutySheet[];
@@ -47,6 +47,8 @@ export const useDutyStore = create<DutyState>((set, get) => ({
   initialize: () => {
     if (typeof window === 'undefined') return;
     try {
+      // Clear legacy cache if present
+      localStorage.removeItem('himalayan_fleet_duty_sheets_v1');
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);

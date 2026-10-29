@@ -1,5 +1,5 @@
 import * as XLSX from 'xlsx';
-import { DutySheet, DutyRow, DutyColumn } from '@/lib/duty-data';
+import { DutySheet, DutyRow, DutyColumn, parseDutyDate } from '@/lib/duty-data';
 
 /**
  * Generates an Excel workbook from DutySheets matching the exact column names of New Duty.xlsx
@@ -145,6 +145,22 @@ export async function parseUploadedExcel(file: File): Promise<DutySheet[]> {
       if (hasVal) {
         rows.push(rowObj);
       }
+    }
+
+    // Intelligently sort imported rows by date in descending order
+    const dateCol = columns.find(c => c.type === 'date' || c.name.toLowerCase().includes('date') || c.originalHeader.toLowerCase().includes('date'))?.key;
+    if (dateCol) {
+      const indexed = rows.map((row, idx) => ({ row, idx, dateTs: parseDutyDate(row[dateCol]) }));
+      indexed.sort((a, b) => {
+        if (a.dateTs !== null && b.dateTs !== null) {
+          if (a.dateTs !== b.dateTs) return b.dateTs - a.dateTs;
+          return a.idx - b.idx;
+        }
+        if (a.dateTs !== null) return -1;
+        if (b.dateTs !== null) return 1;
+        return a.idx - b.idx;
+      });
+      rows.splice(0, rows.length, ...indexed.map(i => i.row));
     }
 
     importedSheets.push({

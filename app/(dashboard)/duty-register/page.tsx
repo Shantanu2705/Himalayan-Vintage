@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import { useDutyStore } from '@/lib/store/use-duty-store';
-import { DutyColumn, DutyRow } from '@/lib/duty-data';
+import { DutyColumn, DutyRow, parseDutyDate } from '@/lib/duty-data';
 import { Button, cn } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -35,6 +35,9 @@ import {
   AlertCircle,
   HelpCircle,
   ArrowDownToLine,
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
   Layers,
   ArrowLeft,
 } from 'lucide-react';
@@ -93,25 +96,106 @@ export default function DutyRegisterPage() {
     return sheets.find((s) => s.name === activeSheetName) || sheets[0];
   }, [sheets, activeSheetName]);
 
-  // Reset pagination when active sheet changes
+  // Dynamic date column key for active sheet
+  const activeDateColKey = useMemo(() => {
+    if (!activeSheet) return 'col_0';
+    const found = activeSheet.columns.find((c) =>
+      c.type === 'date' ||
+      c.name.toLowerCase().includes('date') ||
+      c.originalHeader.toLowerCase().includes('date')
+    );
+    return found ? found.key : 'col_0';
+  }, [activeSheet]);
+
+  // Sorting state - defaults to Date column in descending order
+  const [sortKey, setSortKey] = useState<string | null>(null);
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+
+  // Reset pagination & default sort to descending when active sheet changes
   useEffect(() => {
     setCurrentPage(1);
     setEditingCell(null);
+    setSortKey(null);
+    setSortDirection('desc');
   }, [activeSheetName]);
 
-  // Filtered rows based on search
+  const handleSort = (colKey: string) => {
+    const currentKey = sortKey || activeDateColKey;
+    if (currentKey === colKey) {
+      setSortDirection((prev) => (prev === 'desc' ? 'asc' : 'desc'));
+    } else {
+      setSortKey(colKey);
+      setSortDirection('desc');
+    }
+  };
+
+  // Filtered and sorted rows based on search & column sorting
   const filteredRows = useMemo(() => {
     if (!activeSheet || !activeSheet.rows) return [];
-    if (!searchQuery.trim()) return activeSheet.rows;
+    let rows = activeSheet.rows;
 
-    const q = searchQuery.toLowerCase().trim();
-    return activeSheet.rows.filter((row) => {
-      return Object.entries(row).some(([key, val]) => {
-        if (key === 'id') return false;
-        return String(val || '').toLowerCase().includes(q);
+    // Search filter
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      rows = rows.filter((row) => {
+        return Object.entries(row).some(([key, val]) => {
+          if (key === 'id') return false;
+          return String(val || '').toLowerCase().includes(q);
+        });
       });
+    }
+
+    const currentKey = sortKey || activeDateColKey;
+    const isDateCol =
+      activeSheet.columns.find((c) => c.key === currentKey)?.type === 'date' ||
+      activeSheet.columns.find((c) => c.key === currentKey)?.name.toLowerCase().includes('date') ||
+      activeSheet.columns.find((c) => c.key === currentKey)?.originalHeader.toLowerCase().includes('date');
+
+    const indexed = rows.map((row, idx) => ({
+      row,
+      origIdx: idx,
+      dateTs: isDateCol ? parseDutyDate(row[currentKey]) : null,
+      val: (row[currentKey] || '').trim(),
+    }));
+
+    indexed.sort((a, b) => {
+      if (isDateCol) {
+        if (a.dateTs !== null && b.dateTs !== null) {
+          if (a.dateTs !== b.dateTs) {
+            return sortDirection === 'desc' ? b.dateTs - a.dateTs : a.dateTs - b.dateTs;
+          }
+          return a.origIdx - b.origIdx;
+        }
+        if (a.dateTs !== null) return -1;
+        if (b.dateTs !== null) return 1;
+        return a.origIdx - b.origIdx;
+      }
+
+      // Numeric comparison
+      const numA = parseFloat(a.val.replace(/[^0-9.-]/g, ''));
+      const numB = parseFloat(b.val.replace(/[^0-9.-]/g, ''));
+      if (!isNaN(numA) && !isNaN(numB) && a.val !== '' && b.val !== '') {
+        if (numA !== numB) {
+          return sortDirection === 'desc' ? numB - numA : numA - numB;
+        }
+        return a.origIdx - b.origIdx;
+      }
+
+      // Text comparison
+      if (a.val && b.val) {
+        const cmp = a.val.localeCompare(b.val, undefined, { numeric: true, sensitivity: 'base' });
+        if (cmp !== 0) {
+          return sortDirection === 'desc' ? -cmp : cmp;
+        }
+        return a.origIdx - b.origIdx;
+      }
+      if (a.val) return -1;
+      if (b.val) return 1;
+      return a.origIdx - b.origIdx;
     });
-  }, [activeSheet, searchQuery]);
+
+    return indexed.map((item) => item.row);
+  }, [activeSheet, searchQuery, sortKey, sortDirection, activeDateColKey]);
 
   // Pagination slices
   const totalPages = Math.ceil(filteredRows.length / pageSize) || 1;
@@ -577,19 +661,44 @@ export default function DutyRegisterPage() {
                 <th className="sticky left-0 z-30 bg-green-950 px-3 py-3 w-12 text-center text-[11px] font-bold tracking-wider uppercase border-r border-green-800">
                   #
                 </th>
-                {activeSheet?.columns.map((col, idx) => (
-                  <th
-                    key={col.key}
-                    className="px-3 py-3 font-semibold text-[11px] tracking-wide whitespace-nowrap border-r border-green-900 last:border-r-0"
-                  >
-                    <div className="flex flex-col">
-                      <span className="text-white">{col.originalHeader}</span>
-                      {col.name !== col.originalHeader && (
-                        <span className="text-[9px] text-green-300 font-normal">({col.name})</span>
+                {activeSheet?.columns.map((col, idx) => {
+                  const currentSortKey = sortKey || activeDateColKey;
+                  const isCurrentSort = currentSortKey === col.key;
+
+                  return (
+                    <th
+                      key={col.key}
+                      onClick={() => handleSort(col.key)}
+                      className={cn(
+                        "px-3 py-3 font-semibold text-[11px] tracking-wide whitespace-nowrap border-r border-green-900 last:border-r-0 cursor-pointer select-none transition-colors hover:bg-green-900/80 group",
+                        isCurrentSort && "bg-green-900/90"
                       )}
-                    </div>
-                  </th>
-                ))}
+                      title={`Click to sort by ${col.name} (${isCurrentSort && sortDirection === 'desc' ? 'ascending' : 'descending'})`}
+                    >
+                      <div className="flex items-center justify-between gap-1.5">
+                        <div className="flex flex-col">
+                          <span className="text-white flex items-center gap-1">
+                            {col.originalHeader}
+                          </span>
+                          {col.name !== col.originalHeader && (
+                            <span className="text-[9px] text-green-300 font-normal">({col.name})</span>
+                          )}
+                        </div>
+                        <div className="flex items-center text-green-300 shrink-0">
+                          {isCurrentSort ? (
+                            sortDirection === 'desc' ? (
+                              <ArrowDown className="h-3.5 w-3.5 text-yellow-400 font-bold" />
+                            ) : (
+                              <ArrowUp className="h-3.5 w-3.5 text-yellow-400 font-bold" />
+                            )
+                          ) : (
+                            <ArrowUpDown className="h-3 w-3 opacity-0 group-hover:opacity-60 transition-opacity" />
+                          )}
+                        </div>
+                      </div>
+                    </th>
+                  );
+                })}
                 <th className="sticky right-0 z-30 bg-green-950 px-3 py-3 text-center text-[11px] font-bold uppercase border-l border-green-800 w-24">
                   Actions
                 </th>
