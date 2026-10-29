@@ -18,6 +18,7 @@ interface PdfPreviewModalProps {
   onClose: () => void;
   title: string;
   documentNo?: string;
+  hidePrintBorder?: boolean;
   children: React.ReactNode;
 }
 
@@ -26,6 +27,7 @@ export const PdfPreviewModal: React.FC<PdfPreviewModalProps> = ({
   onClose,
   title,
   documentNo,
+  hidePrintBorder = false,
   children,
 }) => {
   const [mounted, setMounted] = React.useState(false);
@@ -83,41 +85,43 @@ export const PdfPreviewModal: React.FC<PdfPreviewModalProps> = ({
         <div id="global-print-area" className="hidden print:block print:w-full print:bg-white print:text-black print:m-0 print:overflow-visible print:z-[99999] static">
           
           {/* Fixed overlay for border and watermark that repeats on every printed page */}
-          <div className="hidden print:flex fixed inset-0 z-0 items-center justify-center pointer-events-none">
-             {/* Border */}
-             <div className="absolute border-[3px] border-primary/30 pointer-events-none" style={{ top: '12px', bottom: '12px', left: '12px', right: '12px' }} />
-             <div className="absolute border border-primary/60 pointer-events-none" style={{ top: '17px', bottom: '17px', left: '17px', right: '17px' }} />
-             {/* Watermark Logo */}
-             {settings?.logoUrl && (
-               <img 
-                 src={settings.logoUrl} 
-                 alt="Watermark" 
-                 className="pointer-events-none drop-shadow-sm"
-                 style={{ 
-                   maxWidth: '75%', 
-                   maxHeight: '75%', 
-                   opacity: 0.12,
-                 }}
-               />
-             )}
-          </div>
+          {!hidePrintBorder && (
+            <div className="hidden print:flex fixed inset-0 z-0 items-center justify-center pointer-events-none">
+               {/* Border */}
+               <div className="absolute border-[3px] border-primary/30 pointer-events-none" style={{ top: '12px', bottom: '12px', left: '12px', right: '12px' }} />
+               <div className="absolute border border-primary/60 pointer-events-none" style={{ top: '17px', bottom: '17px', left: '17px', right: '17px' }} />
+               {/* Watermark Logo */}
+               {settings?.logoUrl && (
+                 <img 
+                   src={settings.logoUrl} 
+                   alt="Watermark" 
+                   className="pointer-events-none drop-shadow-sm"
+                   style={{ 
+                     maxWidth: '75%', 
+                     maxHeight: '75%', 
+                     opacity: 0.12,
+                   }}
+                 />
+               )}
+            </div>
+          )}
 
           <table className="relative z-10 w-full mx-auto max-w-[210mm]" style={{ boxSizing: 'border-box' }}>
             <thead>
               <tr>
-                <td style={{ height: '40px' }}></td>
+                <td style={{ height: hidePrintBorder ? '15px' : '40px' }}></td>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td style={{ padding: '0 40px' }}>
+                <td style={{ padding: hidePrintBorder ? '0 15px' : '0 40px' }}>
                   {children}
                 </td>
               </tr>
             </tbody>
             <tfoot>
               <tr>
-                <td style={{ height: '40px' }}></td>
+                <td style={{ height: hidePrintBorder ? '15px' : '40px' }}></td>
               </tr>
             </tfoot>
           </table>

@@ -12,6 +12,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card } from '@/components/ui/card';
 import { PdfPreviewModal } from '@/components/shared/pdf-preview-modal';
 import { ReceiptPdfTemplate } from '@/components/pdf/receipt-template';
+import {
+  BookingConfirmationPdfTemplate,
+  getBookingConfirmationData,
+} from '@/components/pdf/booking-confirmation-template';
 import { formatCurrency } from '@/utils/formatters';
 import { ArrowLeft, Printer, Trash2, Save, Download } from 'lucide-react';
 
@@ -25,6 +29,7 @@ function ReceiptEditorPageInner() {
   const { receipts, addReceipt, updateReceipt, deleteReceipt, quotations, settings } = useFleetStore();
   
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
   const quotationId = searchParams.get('quotationId');
 
   const defaultReceiptNo = `REC-2026-${String(receipts.length + 7).padStart(4, '0')}`;
@@ -144,13 +149,16 @@ function ReceiptEditorPageInner() {
               <Button variant="outline" size="sm" onClick={handleSave} className="bg-white rounded-full font-semibold px-4 h-9 shadow-sm border-gray-200">
                 <Save className="w-4 h-4 mr-1.5" /> Save
               </Button>
+              <Button size="sm" onClick={() => setIsConfirmationOpen(true)} className="bg-[#e5fcf0] hover:bg-[#d1fae5] text-[#064e3b] border border-[#064e3b]/20 rounded-full font-bold px-4 h-9 shadow-none">
+                <Download className="w-4 h-4 mr-1.5 text-emerald-700" /> Confirmation PDF
+              </Button>
               <Button size="sm" onClick={() => setIsPreviewOpen(true)} className="bg-yellow-400 hover:bg-yellow-500 text-yellow-950 rounded-full font-bold px-5 h-9 shadow-none border-0">
-                <Download className="w-4 h-4 mr-1.5" /> Download PDF
+                <Download className="w-4 h-4 mr-1.5" /> Receipt PDF
               </Button>
             </div>
           </div>
 
-          {/* PDF Preview Modal */}
+          {/* PDF Preview Modal - Official Receipt */}
           {isPreviewOpen && (
             <PdfPreviewModal
               isOpen={isPreviewOpen}
@@ -159,6 +167,26 @@ function ReceiptEditorPageInner() {
               documentNo={receipt.receiptNo}
             >
               <ReceiptPdfTemplate receipt={receipt} settings={settings} />
+            </PdfPreviewModal>
+          )}
+
+          {/* PDF Preview Modal - Booking Confirmation */}
+          {isConfirmationOpen && (
+            <PdfPreviewModal
+              isOpen={isConfirmationOpen}
+              onClose={() => setIsConfirmationOpen(false)}
+              title="Booking Confirmation"
+              documentNo={receipt.receiptNo}
+              hidePrintBorder={true}
+            >
+              <BookingConfirmationPdfTemplate
+                data={getBookingConfirmationData(
+                  quotations.find(q => q.quotationNo === receipt.quotationNo),
+                  Number(receipt.receivedAmount) || Number(receipt.amount) || 0,
+                  [receipt as Receipt],
+                  settings
+                )}
+              />
             </PdfPreviewModal>
           )}
 

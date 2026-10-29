@@ -10,16 +10,34 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { StatusBadge } from '@/components/shared/status-badge';
 import { formatCurrency, formatDate } from '@/utils/formatters';
-import { Search, Plus, FileText, Receipt as ReceiptIcon, FileClock, Trash2 } from 'lucide-react';
+import { Search, Plus, FileText, Receipt as ReceiptIcon, FileClock, Trash2, Download } from 'lucide-react';
 import { Invoice, Receipt, Quotation, Booking } from '@/types';
+import { PdfPreviewModal } from '@/components/shared/pdf-preview-modal';
+import {
+  BookingConfirmationPdfTemplate,
+  getBookingConfirmationData,
+  BookingConfirmationData,
+} from '@/components/pdf/booking-confirmation-template';
 
 function BillingHubInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { invoices, receipts, quotations, bookings, deleteReceipt, deleteInvoice } = useFleetStore();
+  const { invoices, receipts, quotations, bookings, deleteReceipt, deleteInvoice, settings } = useFleetStore();
   const tabParam = searchParams.get('tab') as 'quotations' | 'receipts' | 'invoices';
   const [activeTab, setActiveTab] = useState<'quotations' | 'receipts' | 'invoices'>(tabParam || 'quotations');
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Booking Confirmation PDF preview modal state
+  const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
+  const [selectedConfirmationData, setSelectedConfirmationData] = useState<BookingConfirmationData | null>(null);
+  const [selectedDocumentNo, setSelectedDocumentNo] = useState<string>('');
+
+  const handleOpenConfirmation = (q: Quotation, totalReceived: number, qReceipts: Receipt[]) => {
+    const data = getBookingConfirmationData(q, totalReceived, qReceipts, settings);
+    setSelectedConfirmationData(data);
+    setSelectedDocumentNo(q.quotationNo || 'Confirmation');
+    setIsConfirmationOpen(true);
+  };
 
   const confirmedQuotations = quotations.filter(q => (q.status || '').toLowerCase() === 'confirmed');
   const confirmedBookings = bookings.filter(b => (b.status || '').toLowerCase() === 'confirmed');
@@ -145,6 +163,16 @@ function BillingHubInner() {
                       <TableCell className="font-bold text-[13px] text-gray-900">{formatCurrency(q.totalAmount)}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">
+                          {(isPartiallyPaid || isFullyPaid) && (
+                            <Button 
+                              onClick={() => handleOpenConfirmation(q, totalReceived, qReceipts)}
+                              size="sm" 
+                              className="h-8 rounded-full text-[12px] font-bold text-[#064e3b] bg-[#e5fcf0] hover:bg-[#d1fae5] border border-[#064e3b]/20 shadow-none transition-all flex items-center gap-1.5"
+                              title="Download Booking Confirmation PDF (Girish Patel Format)"
+                            >
+                              <Download className="w-3.5 h-3.5 text-emerald-700" /> Confirmation PDF
+                            </Button>
+                          )}
                           {isFullyPaid ? (
                             <Button 
                               onClick={() => {
@@ -254,13 +282,13 @@ function BillingHubInner() {
                   <TableHead className="font-semibold text-gray-600 text-[13px] h-11">Mode</TableHead>
                   <TableHead className="font-semibold text-gray-600 text-[13px] h-11">Received</TableHead>
                   <TableHead className="font-semibold text-gray-600 text-[13px] h-11">Balance</TableHead>
-                  <TableHead className="font-semibold text-gray-600 text-[13px] h-11 rounded-tr-xl text-center w-[80px]">Actions</TableHead>
+                  <TableHead className="font-semibold text-gray-600 text-[13px] h-11 rounded-tr-xl text-center w-[110px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredReceipts.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="h-32 text-center text-gray-400 text-sm">
+                    <TableCell colSpan={8} className="h-32 text-center text-gray-400 text-sm">
                       No receipts found.
                     </TableCell>
                   </TableRow>
@@ -293,19 +321,37 @@ function BillingHubInner() {
                         {formatCurrency(balance > 0 ? balance : 0)}
                       </TableCell>
                       <TableCell className="text-center">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 w-8 rounded-full"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (window.confirm("Are you sure you want to delete this receipt?")) {
-                              deleteReceipt(r.id);
-                            }
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        <div className="flex items-center justify-center gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-emerald-700 hover:text-emerald-900 hover:bg-emerald-50 h-8 w-8 rounded-full"
+                            title="Download Booking Confirmation PDF"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const relatedQ = quotations.find(q => q.quotationNo === r.quotationNo || (r.bookingId && q.id === r.bookingId));
+                              const confData = getBookingConfirmationData(relatedQ || null, received, [r], settings);
+                              setSelectedConfirmationData(confData);
+                              setSelectedDocumentNo(r.receiptNo || 'Confirmation');
+                              setIsConfirmationOpen(true);
+                            }}
+                          >
+                            <Download className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 w-8 rounded-full"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (window.confirm("Are you sure you want to delete this receipt?")) {
+                                deleteReceipt(r.id);
+                              }
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                     );
@@ -393,6 +439,18 @@ function BillingHubInner() {
               </TableBody>
             </Table>
           </Card>
+        )}
+        {/* Booking Confirmation PDF Preview Modal */}
+        {selectedConfirmationData && (
+          <PdfPreviewModal
+            isOpen={isConfirmationOpen}
+            onClose={() => setIsConfirmationOpen(false)}
+            title="Booking Confirmation"
+            documentNo={selectedDocumentNo}
+            hidePrintBorder={true}
+          >
+            <BookingConfirmationPdfTemplate data={selectedConfirmationData} />
+          </PdfPreviewModal>
         )}
       </div>
     </DashboardLayout>
