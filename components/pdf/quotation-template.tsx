@@ -30,6 +30,9 @@ function numberToWords(num: number): string {
   return str.trim();
 }
 
+export const DEFAULT_PAYMENT_MODE = `• Booking to be confirmed only after getting the minimum token amount of INR 50% by cash / fund transfer (non-refundable) & remaining full payment will have to pay by cash only in advance before starting the journey – Otherwise Himalayan Taxi reserves the right to cancel the pre-booking service.
+• If we get any booking from Travel Agency / Authority / Management against token amount – That time they have to libel to clear the remaining full payment – Otherwise we will be collecting the remain full payment for Guest / Client directly.`;
+
 export const QuotationPdfTemplate: React.FC<QuotationPdfTemplateProps> = ({ quotation, settings }) => {
   const companyName = settings?.companyName || 'Himalayan Vintage Holidays';
   const rawAddress = settings?.companyAddress || settings?.address || '';
@@ -42,6 +45,13 @@ export const QuotationPdfTemplate: React.FC<QuotationPdfTemplateProps> = ({ quot
   const cabSummary = quotation.vehicles?.length > 0 
     ? quotation.vehicles.map((v: any) => `${v.vehicle} X ${String(v.qty || 1).padStart(2, '0')}`).join(', ')
     : 'Not Specified';
+
+  const paymentModeRaw = (settings?.paymentMode || DEFAULT_PAYMENT_MODE).trim();
+  const paymentModeLines = paymentModeRaw
+    .replace(/^Payment Mode:\s*/i, '')
+    .split('\n')
+    .map((l) => l.trim())
+    .filter(Boolean);
 
   return (
     <div 
@@ -183,36 +193,41 @@ export const QuotationPdfTemplate: React.FC<QuotationPdfTemplateProps> = ({ quot
         </div>
       )}
 
-      {/* Terms and Conditions / Remarks */}
-      {(quotation.terms || quotation.remarks || settings?.paymentMode) && (
-        <div className="space-y-4 mt-6 text-[#0c2f5d] break-before-auto">
-          {(quotation.remarks || settings?.paymentMode) && (
-            <div>
-              <div className="font-bold underline mb-1">Payment Mode / Remarks:</div>
-              <ul className="list-disc pl-8 space-y-1">
-                {settings?.paymentMode && (
-                  <li className="text-justify font-bold">
-                    Mode of Payment: {settings.paymentMode}
-                  </li>
-                )}
-                {quotation.remarks && quotation.remarks.split('\n').filter((t: string) => t.trim() !== '').map((remark: string, idx: number) => (
-                  <li key={idx} className="text-justify">{remark.trim().replace(/^[-•]\s*/, '')}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-          {quotation.terms && (
-            <div>
-              <div className="font-bold underline mb-1">Terms & Condition:</div>
-              <ul className="list-disc pl-8 space-y-1">
-                {quotation.terms.split('\n').filter((t: string) => t.trim() !== '').map((term: string, idx: number) => (
-                  <li key={idx} className="text-justify">{term.trim().replace(/^[-•]\s*/, '')}</li>
-                ))}
-              </ul>
-            </div>
-          )}
+      {/* Payment Mode / Remarks / Terms */}
+      <div className="space-y-4 mt-6 text-[#0c2f5d] break-before-auto">
+        <div>
+          <div className="font-bold underline mb-1">Payment Mode:</div>
+          <ul className="list-disc pl-8 space-y-1.5">
+            {paymentModeLines.map((line, idx) => (
+              <li key={idx} className="text-justify font-bold leading-relaxed">
+                {line.replace(/^[•\-\*]\s*/, '')}
+              </li>
+            ))}
+          </ul>
         </div>
-      )}
+
+        {quotation.remarks && (
+          <div>
+            <div className="font-bold underline mb-1">Remarks:</div>
+            <ul className="list-disc pl-8 space-y-1">
+              {quotation.remarks.split('\n').filter((t: string) => t.trim() !== '').map((remark: string, idx: number) => (
+                <li key={idx} className="text-justify">{remark.trim().replace(/^[-•]\s*/, '')}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {quotation.terms && (
+          <div>
+            <div className="font-bold underline mb-1">Terms & Condition:</div>
+            <ul className="list-disc pl-8 space-y-1">
+              {quotation.terms.split('\n').filter((t: string) => t.trim() !== '').map((term: string, idx: number) => (
+                <li key={idx} className="text-justify">{term.trim().replace(/^[-•]\s*/, '')}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
       
       {/* Footer Details */}
       {settings?.footerLogoUrl && (

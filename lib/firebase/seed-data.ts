@@ -165,6 +165,8 @@ export const initialSettings: CompanySettings = {
   companyState: 'West Bengal',
   companyAddress: 'Ashok Nagar, bagdogra P.O - bagdogra, Dist. - Darjeeling - 734014',
   phone: '+91 9851544861',
+  paymentMode: `• Booking to be confirmed only after getting the minimum token amount of INR 50% by cash / fund transfer (non-refundable) & remaining full payment will have to pay by cash only in advance before starting the journey – Otherwise Himalayan Taxi reserves the right to cancel the pre-booking service.
+• If we get any booking from Travel Agency / Authority / Management against token amount – That time they have to libel to clear the remaining full payment – Otherwise we will be collecting the remain full payment for Guest / Client directly.`,
   companyPan: '',
   cancellationPolicy: ``
 };

@@ -10,6 +10,9 @@ import { Button } from '@/components/ui/button';
 import { updateCredentials } from '@/lib/firebase/auth';
 import { Upload, Trash2 } from 'lucide-react';
 
+export const DEFAULT_PAYMENT_MODE = `• Booking to be confirmed only after getting the minimum token amount of INR 50% by cash / fund transfer (non-refundable) & remaining full payment will have to pay by cash only in advance before starting the journey – Otherwise Himalayan Taxi reserves the right to cancel the pre-booking service.
+• If we get any booking from Travel Agency / Authority / Management against token amount – That time they have to libel to clear the remaining full payment – Otherwise we will be collecting the remain full payment for Guest / Client directly.`;
+
 function SettingsContent() {
   const { settings, updateSettings } = useFleetStore();
   const [loading, setLoading] = useState(false);
@@ -36,7 +39,7 @@ function SettingsContent() {
   const [ifsc, setIfsc] = useState('HDFC0001234');
   const [branch, setBranch] = useState('Siliguri Main');
   const [upiId, setUpiId] = useState('himalayantaxi@hdfc');
-  const [paymentMode, setPaymentMode] = useState('UPI / Bank Transfer / Cash');
+  const [paymentMode, setPaymentMode] = useState(DEFAULT_PAYMENT_MODE);
   const [qrCodeUrl, setQrCodeUrl] = useState('');
   
   // Appearance
@@ -68,7 +71,7 @@ function SettingsContent() {
       if (settings.ifsc) setIfsc(settings.ifsc);
       if (settings.branch) setBranch(settings.branch);
       if (settings.upiId) setUpiId(settings.upiId);
-      if (settings.paymentMode) setPaymentMode(settings.paymentMode);
+      setPaymentMode(settings.paymentMode || DEFAULT_PAYMENT_MODE);
       if (settings.qrCodeUrl) setQrCodeUrl(settings.qrCodeUrl);
       if (settings.adminFullName) setAdminFullName(settings.adminFullName);
       if (settings.adminEmail) setAdminEmail(settings.adminEmail);
@@ -287,14 +290,15 @@ function SettingsContent() {
               <Input value={upiId} onChange={e => setUpiId(e.target.value)} className="h-10 rounded-xl border-gray-200 text-[14px]" />
             </div>
             <div className="space-y-1.5 md:col-span-2">
-              <Label className="text-[12px] text-gray-600 font-medium">Payment Mode</Label>
-              <Input 
+              <Label className="text-[12px] text-gray-700 font-bold">Payment Mode</Label>
+              <Textarea 
                 value={paymentMode} 
                 onChange={e => setPaymentMode(e.target.value)} 
-                placeholder="e.g. UPI / Bank Transfer / Cash" 
-                className="h-10 rounded-xl border-gray-200 text-[14px]" 
+                rows={5}
+                placeholder="Enter Payment Mode details..." 
+                className="min-h-[120px] rounded-xl border-gray-200 text-[13px] leading-relaxed p-3.5 text-gray-700 shadow-none focus-visible:ring-1" 
               />
-              <p className="text-[11px] text-gray-400">This payment mode will be automatically fetched and displayed in all downloadable PDFs.</p>
+              <p className="text-[11px] text-gray-400">This Payment Mode is displayed on the Quotation PDF and is editable anytime.</p>
             </div>
             <div className="space-y-2 col-span-2">
               <Label className="text-[12px] text-gray-700 font-medium">Payment QR code</Label>
