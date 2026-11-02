@@ -199,6 +199,7 @@ export interface Quotation {
   clientEmail?: string;
   companyName?: string;
   businessHouse?: string;
+  confirmationRemarks?: string;
   gstin?: string;
   pickupLocation: string;
   vehicle: string;
@@ -230,6 +231,8 @@ export interface Quotation {
   status: QuotationStatus;
   inclusions?: string[];
   exclusions?: string[];
+  remarks?: string;
+  notes?: string;
 }
 
 export type BookingStatus = 'pending' | 'confirmed' | 'cancelled' | 'completed' | string;
@@ -359,6 +362,7 @@ export interface Receipt {
   costingOverride?: string;
   advanceLineOverride?: string;
   stayDetails?: string;
+  confirmationRemarks?: string;
   checkedByName?: string;
   designation?: string;
 }

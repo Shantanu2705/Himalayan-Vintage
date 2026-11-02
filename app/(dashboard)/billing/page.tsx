@@ -34,14 +34,17 @@ function BillingHubInner() {
   const [selectedQuotation, setSelectedQuotation] = useState<Quotation | null>(null);
   const [selectedReceipt, setSelectedReceipt] = useState<Receipt | null>(null);
   const [businessHouseInput, setBusinessHouseInput] = useState<string>('');
+  const [remarksInput, setRemarksInput] = useState<string>('');
 
   const handleOpenConfirmation = (q: Quotation, totalReceived: number, qReceipts: Receipt[]) => {
     setSelectedQuotation(q);
     const latestReceipt = qReceipts && qReceipts.length > 0 ? qReceipts[qReceipts.length - 1] : null;
     setSelectedReceipt(latestReceipt);
     const initialBH = q.businessHouse || latestReceipt?.businessHouse || q.companyName || '';
+    const initialRemarks = q.confirmationRemarks || latestReceipt?.confirmationRemarks || latestReceipt?.remarks || q.notes || q.remarks || 'For Tsomgo Lake, baba Mandir and Nathula Pass only One Innova Crysta Will be Provided';
     setBusinessHouseInput(initialBH);
-    const data = getBookingConfirmationData(q, totalReceived, qReceipts, settings, initialBH);
+    setRemarksInput(initialRemarks);
+    const data = getBookingConfirmationData(q, totalReceived, qReceipts, settings, initialBH, initialRemarks);
     setSelectedConfirmationData(data);
     setSelectedDocumentNo(q.quotationNo || 'Confirmation');
     setIsConfirmationOpen(true);
@@ -339,10 +342,12 @@ function BillingHubInner() {
                               e.stopPropagation();
                               const relatedQ = quotations.find(q => q.quotationNo === r.quotationNo || (r.bookingId && q.id === r.bookingId));
                               const initialBH = r.businessHouse || relatedQ?.businessHouse || relatedQ?.companyName || '';
+                              const initialRemarks = r.confirmationRemarks || relatedQ?.confirmationRemarks || r.remarks || relatedQ?.notes || relatedQ?.remarks || 'For Tsomgo Lake, baba Mandir and Nathula Pass only One Innova Crysta Will be Provided';
                               setBusinessHouseInput(initialBH);
+                              setRemarksInput(initialRemarks);
                               setSelectedQuotation(relatedQ || null);
                               setSelectedReceipt(r);
-                              const confData = getBookingConfirmationData(relatedQ || null, received, [r], settings, initialBH);
+                              const confData = getBookingConfirmationData(relatedQ || null, received, [r], settings, initialBH, initialRemarks);
                               setSelectedConfirmationData(confData);
                               setSelectedDocumentNo(r.receiptNo || 'Confirmation');
                               setIsConfirmationOpen(true);
@@ -461,30 +466,52 @@ function BillingHubInner() {
             documentNo={selectedDocumentNo}
             hidePrintBorder={true}
           >
-            {/* Admin Business House Controller Bar (visible in modal preview, hidden in print) */}
-            <div className="mb-5 bg-emerald-50/90 border border-emerald-200/80 rounded-xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 no-print">
-              <div className="flex items-center gap-2.5 flex-1">
-                <span className="text-[12px] font-bold text-emerald-950 shrink-0">Business House:</span>
+            {/* Admin Business House & Remarks Controller Bar (visible in modal preview, hidden in print) */}
+            <div className="mb-5 bg-emerald-50/90 border border-emerald-200/80 rounded-xl p-3.5 space-y-3 no-print">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5 flex-1">
+                  <span className="text-[12px] font-bold text-emerald-950 shrink-0 w-28">Business House:</span>
+                  <Input
+                    value={businessHouseInput}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setBusinessHouseInput(val);
+                      setSelectedConfirmationData((prev) => (prev ? { ...prev, businessHouse: val } : null));
+                      if (selectedQuotation) {
+                        updateQuotation({ ...selectedQuotation, businessHouse: val });
+                      }
+                      if (selectedReceipt) {
+                        updateReceipt({ ...selectedReceipt, businessHouse: val });
+                      }
+                    }}
+                    placeholder="Enter Business House (e.g. Travel Amore)"
+                    className="h-8 text-xs bg-white border-emerald-300 text-gray-800 rounded-lg max-w-sm"
+                  />
+                </div>
+                <span className="text-[11px] font-medium text-emerald-700 italic">
+                  Different per confirmation PDF
+                </span>
+              </div>
+
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2.5">
+                <span className="text-[12px] font-bold text-emerald-950 shrink-0 w-28">Remarks:</span>
                 <Input
-                  value={businessHouseInput}
+                  value={remarksInput}
                   onChange={(e) => {
                     const val = e.target.value;
-                    setBusinessHouseInput(val);
-                    setSelectedConfirmationData((prev) => (prev ? { ...prev, businessHouse: val } : null));
+                    setRemarksInput(val);
+                    setSelectedConfirmationData((prev) => (prev ? { ...prev, remarks: val } : null));
                     if (selectedQuotation) {
-                      updateQuotation({ ...selectedQuotation, businessHouse: val });
+                      updateQuotation({ ...selectedQuotation, confirmationRemarks: val });
                     }
                     if (selectedReceipt) {
-                      updateReceipt({ ...selectedReceipt, businessHouse: val });
+                      updateReceipt({ ...selectedReceipt, confirmationRemarks: val });
                     }
                   }}
-                  placeholder="Enter Business House (e.g. Travel Amore)"
-                  className="h-8 text-xs bg-white border-emerald-300 text-gray-800 rounded-lg max-w-sm"
+                  placeholder="Enter custom remarks for confirmation PDF..."
+                  className="h-8 text-xs bg-white border-emerald-300 text-gray-800 rounded-lg flex-1"
                 />
               </div>
-              <span className="text-[11px] font-medium text-emerald-700 italic">
-                Different per confirmation PDF
-              </span>
             </div>
 
             <BookingConfirmationPdfTemplate data={selectedConfirmationData} />

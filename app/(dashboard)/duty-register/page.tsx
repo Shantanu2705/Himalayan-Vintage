@@ -60,6 +60,8 @@ export default function DutyRegisterPage() {
     duplicateRow,
     addSheet,
     deleteSheet,
+    addColumn,
+    deleteColumn,
     resetToOriginal,
     exportExcel,
     exportCsv,
@@ -78,6 +80,7 @@ export default function DutyRegisterPage() {
   const [isAddRowOpen, setIsAddRowOpen] = useState(false);
   const [isEditRowOpen, setIsEditRowOpen] = useState(false);
   const [isAddSheetOpen, setIsAddSheetOpen] = useState(false);
+  const [isAddColOpen, setIsAddColOpen] = useState(false);
   const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
   const [isExportMenuOpen, setIsExportMenuOpen] = useState(false);
 
@@ -85,6 +88,8 @@ export default function DutyRegisterPage() {
   const [activeRowData, setActiveRowData] = useState<Record<string, string>>({});
   const [targetRowId, setTargetRowId] = useState<string | null>(null);
   const [newSheetName, setNewSheetName] = useState('');
+  const [newColName, setNewColName] = useState('');
+  const [newColType, setNewColType] = useState<'text' | 'number' | 'date'>('text');
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -341,6 +346,16 @@ export default function DutyRegisterPage() {
     setNewSheetName('');
     setIsAddSheetOpen(false);
     showNotice(`Sheet "${name}" created`);
+  };
+
+  // Column creation
+  const handleAddColumn = () => {
+    if (!activeSheet || !newColName.trim()) return;
+    addColumn(activeSheet.name, newColName.trim(), newColType);
+    setNewColName('');
+    setNewColType('text');
+    setIsAddColOpen(false);
+    showNotice(`Column "${newColName.trim()}" added to ${activeSheet.name}`);
   };
 
   // Excel File Upload
@@ -648,6 +663,16 @@ export default function DutyRegisterPage() {
               <ArrowDownToLine className="h-3 w-3" />
               <span>CSV</span>
             </Button>
+
+            <Button
+              size="sm"
+              onClick={() => setIsAddColOpen(true)}
+              className="h-8 text-xs gap-1.5 bg-emerald-700 hover:bg-emerald-800 text-white font-semibold shadow-sm"
+              title={`Add new column to ${activeSheet?.name}`}
+            >
+              <Plus className="h-3.5 w-3.5" />
+              <span>Add Column</span>
+            </Button>
           </div>
         </div>
 
@@ -659,6 +684,15 @@ export default function DutyRegisterPage() {
             <span>{activeSheet?.description}</span>
           </div>
           <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsAddColOpen(true)}
+              className="h-6 px-2 text-[11px] gap-1 border-emerald-300 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 font-semibold"
+            >
+              <Plus className="h-3 w-3 text-emerald-700" />
+              <span>Add Column</span>
+            </Button>
             <span className="font-medium">💡 Tip: Double-click or click any cell to edit directly!</span>
           </div>
         </div>
@@ -689,6 +723,21 @@ export default function DutyRegisterPage() {
                         <div className="flex flex-col">
                           <span className="text-white flex items-center gap-1">
                             {col.originalHeader}
+                            {col.key.startsWith('col_custom_') && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (confirm(`Delete column "${col.name}" from ${activeSheet.name}?`)) {
+                                    deleteColumn(activeSheet.name, col.key);
+                                    showNotice(`Column "${col.name}" deleted`);
+                                  }
+                                }}
+                                className="ml-1 text-red-300 hover:text-red-100 p-0.5 rounded transition-colors"
+                                title="Delete this custom column"
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </button>
+                            )}
                           </span>
                           {col.name !== col.originalHeader && (
                             <span className="text-[9px] text-green-300 font-normal">({col.name})</span>
@@ -1125,6 +1174,69 @@ export default function DutyRegisterPage() {
               }}
             >
               Reset Data
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* MODAL: Add Column Manually */}
+      <Dialog open={isAddColOpen} onOpenChange={setIsAddColOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-base font-bold">
+              <Plus className="h-4 w-4 text-emerald-600" />
+              Add Column to "{activeSheet?.name}"
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold text-gray-700">Column Header / Name *</Label>
+              <Input
+                placeholder="e.g. Hotel / Room No, Guide Name, Toll Cost"
+                value={newColName}
+                onChange={(e) => setNewColName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleAddColumn();
+                  }
+                }}
+                className="h-9 text-xs"
+                autoFocus
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold text-gray-700">Data Type</Label>
+              <select
+                value={newColType}
+                onChange={(e) => setNewColType(e.target.value as any)}
+                className="w-full h-9 rounded-md border border-gray-200 bg-white px-3 text-xs dark:border-gray-800 dark:bg-gray-900"
+              >
+                <option value="text">Text (General)</option>
+                <option value="number">Number / Amount</option>
+                <option value="date">Date</option>
+              </select>
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              This column will be added specifically to sheet <strong>{activeSheet?.name}</strong>. It will be editable directly in the table and included in duty exports.
+            </p>
+          </div>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsAddColOpen(false)}
+              className="text-xs"
+            >
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              onClick={handleAddColumn}
+              disabled={!newColName.trim()}
+              className="text-xs bg-emerald-700 hover:bg-emerald-800 text-white font-semibold"
+            >
+              Add Column
             </Button>
           </DialogFooter>
         </DialogContent>

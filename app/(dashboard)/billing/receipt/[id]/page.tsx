@@ -179,20 +179,32 @@ function ReceiptEditorPageInner() {
               documentNo={receipt.receiptNo}
               hidePrintBorder={true}
             >
-              {/* Admin Business House Controller Bar (visible in modal preview, hidden in print) */}
-              <div className="mb-5 bg-emerald-50/90 border border-emerald-200/80 rounded-xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 no-print">
-                <div className="flex items-center gap-2.5 flex-1">
-                  <span className="text-[12px] font-bold text-emerald-950 shrink-0">Business House:</span>
+              {/* Admin Business House & Remarks Controller Bar (visible in modal preview, hidden in print) */}
+              <div className="mb-5 bg-emerald-50/90 border border-emerald-200/80 rounded-xl p-3.5 space-y-3 no-print">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5 flex-1">
+                    <span className="text-[12px] font-bold text-emerald-950 shrink-0 w-28">Business House:</span>
+                    <Input
+                      value={receipt.businessHouse || ''}
+                      onChange={(e) => handleUpdate('businessHouse', e.target.value)}
+                      placeholder="Enter Business House (e.g. Travel Amore)"
+                      className="h-8 text-xs bg-white border-emerald-300 text-gray-800 rounded-lg max-w-sm"
+                    />
+                  </div>
+                  <span className="text-[11px] font-medium text-emerald-700 italic">
+                    Different per confirmation PDF
+                  </span>
+                </div>
+
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2.5">
+                  <span className="text-[12px] font-bold text-emerald-950 shrink-0 w-28">Remarks:</span>
                   <Input
-                    value={receipt.businessHouse || ''}
-                    onChange={(e) => handleUpdate('businessHouse', e.target.value)}
-                    placeholder="Enter Business House (e.g. Travel Amore)"
-                    className="h-8 text-xs bg-white border-emerald-300 text-gray-800 rounded-lg max-w-sm"
+                    value={receipt.confirmationRemarks || receipt.remarks || ''}
+                    onChange={(e) => handleUpdate('confirmationRemarks', e.target.value)}
+                    placeholder="Enter custom remarks for confirmation PDF..."
+                    className="h-8 text-xs bg-white border-emerald-300 text-gray-800 rounded-lg flex-1"
                   />
                 </div>
-                <span className="text-[11px] font-medium text-emerald-700 italic">
-                  Different per confirmation PDF
-                </span>
               </div>
               <BookingConfirmationPdfTemplate
                 data={getBookingConfirmationData(
@@ -200,7 +212,8 @@ function ReceiptEditorPageInner() {
                   Number(receipt.receivedAmount) || Number(receipt.amount) || 0,
                   [receipt as Receipt],
                   settings,
-                  receipt.businessHouse
+                  receipt.businessHouse,
+                  receipt.confirmationRemarks || receipt.remarks
                 )}
               />
             </PdfPreviewModal>

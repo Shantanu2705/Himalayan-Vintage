@@ -205,6 +205,10 @@ interface DutyState {
   duplicateRow: (sheetName: string, rowId: string) => void;
   reorderRow: (sheetName: string, fromIndex: number, toIndex: number) => void;
 
+  // Column Operations
+  addColumn: (sheetName: string, columnName: string, columnType?: 'text' | 'number' | 'date') => void;
+  deleteColumn: (sheetName: string, colKey: string) => void;
+
   // Sheet Operations
   addSheet: (sheetName: string, title?: string, description?: string) => void;
   deleteSheet: (sheetName: string) => void;
@@ -385,6 +389,55 @@ export const useDutyStore = create<DutyState>((set, get) => ({
       const [moved] = rowsCopy.splice(fromIndex, 1);
       rowsCopy.splice(toIndex, 0, moved);
       return { ...sheet, rows: rowsCopy };
+    });
+
+    set({ sheets: updated });
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+      } catch (e) {
+        console.error('Storage error:', e);
+      }
+    }
+  },
+
+  addColumn: (sheetName, columnName, columnType = 'text') => {
+    const cleanName = columnName.trim();
+    if (!cleanName) return;
+    const { sheets } = get();
+    const updated = sheets.map((sheet) => {
+      if (sheet.name !== sheetName) return sheet;
+      const colKey = `col_custom_${Date.now()}`;
+      const newCol: DutyColumn = {
+        key: colKey,
+        name: cleanName,
+        originalHeader: cleanName,
+        type: columnType,
+      };
+      return {
+        ...sheet,
+        columns: [...sheet.columns, newCol],
+      };
+    });
+
+    set({ sheets: updated });
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+      } catch (e) {
+        console.error('Storage error:', e);
+      }
+    }
+  },
+
+  deleteColumn: (sheetName, colKey) => {
+    const { sheets } = get();
+    const updated = sheets.map((sheet) => {
+      if (sheet.name !== sheetName) return sheet;
+      return {
+        ...sheet,
+        columns: sheet.columns.filter((c) => c.key !== colKey),
+      };
     });
 
     set({ sheets: updated });

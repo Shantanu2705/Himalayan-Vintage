@@ -96,7 +96,8 @@ export function getBookingConfirmationData(
   totalReceived?: number,
   receipts?: any[],
   settings?: CompanySettings | null,
-  manualBusinessHouse?: string
+  manualBusinessHouse?: string,
+  manualRemarks?: string
 ): BookingConfirmationData {
   const qReceipt = receipts && receipts.length > 0 ? receipts[receipts.length - 1] : null;
 
@@ -181,11 +182,15 @@ export function getBookingConfirmationData(
     adv = `Rs. ${advanceAmount} (${advWords} Only)`;
   }
 
-  // 11. Remarks
-  const remarks = qReceipt?.remarks ||
-    quotation?.notes ||
-    quotation?.remarks ||
-    'For Tsomgo Lake, baba Mandir and Nathula Pass only One Innova Crysta Will be Provided';
+  // 11. Remarks (manually entered by admin or saved per quotation/receipt)
+  const remarks = manualRemarks !== undefined
+    ? manualRemarks
+    : (quotation?.confirmationRemarks ||
+       qReceipt?.confirmationRemarks ||
+       qReceipt?.remarks ||
+       quotation?.notes ||
+       quotation?.remarks ||
+       'For Tsomgo Lake, baba Mandir and Nathula Pass only One Innova Crysta Will be Provided');
 
   // 12. Stay
   const stay = qReceipt?.stayDetails || quotation?.destination || 'Gangtok, Pelling and Darjeeling';
