@@ -78,23 +78,26 @@ export const QuotationPdfTemplate: React.FC<QuotationPdfTemplateProps> = ({ quot
       {/* Date */}
       <div className="mb-4">
         <span className="bg-yellow-300 font-bold px-1">
-          Date: {formatDate(quotation.date || quotation.createdAt || new Date().toISOString())} - {quotation.clientPhone || quotation.mobile || 'Contact Not Provided'}
+          Date: {formatDate(quotation.startDate || quotation.travelDate || quotation.date || quotation.createdAt || new Date().toISOString())} - {quotation.clientPhone || quotation.mobile || 'Contact Not Provided'}
         </span>
       </div>
 
       {/* Day-Wise Itinerary */}
       {quotation.itinerary && quotation.itinerary.length > 0 && (
         <div className="space-y-4">
-          {quotation.itinerary.map((item: any, idx: number) => (
-            <div key={idx}>
-              <div className="inline-block bg-yellow-300 font-bold mb-1 px-1">
-                Day: {idx + 1} {item.heading ? `[${item.heading}]` : ''}
+          {quotation.itinerary.map((item: any, idx: number) => {
+            const cleanHeading = (item.heading || item.title || '').replace(/[\[\]]/g, '').trim();
+            return (
+              <div key={idx}>
+                <div className="inline-block bg-yellow-300 font-bold mb-1 px-1">
+                  Day: {idx + 1} {cleanHeading ? ` ${cleanHeading}` : ''}
+                </div>
+                <div className="text-justify text-[#0c2f5d]">
+                  {item.desc || item.description}
+                </div>
               </div>
-              <div className="text-justify text-[#0c2f5d]">
-                {item.desc || item.description}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
@@ -181,13 +184,18 @@ export const QuotationPdfTemplate: React.FC<QuotationPdfTemplateProps> = ({ quot
       )}
 
       {/* Terms and Conditions / Remarks */}
-      {(quotation.terms || quotation.remarks) && (
+      {(quotation.terms || quotation.remarks || settings?.paymentMode) && (
         <div className="space-y-4 mt-6 text-[#0c2f5d] break-before-auto">
-          {quotation.remarks && (
+          {(quotation.remarks || settings?.paymentMode) && (
             <div>
               <div className="font-bold underline mb-1">Payment Mode / Remarks:</div>
               <ul className="list-disc pl-8 space-y-1">
-                {quotation.remarks.split('\n').filter((t: string) => t.trim() !== '').map((remark: string, idx: number) => (
+                {settings?.paymentMode && (
+                  <li className="text-justify font-bold">
+                    Mode of Payment: {settings.paymentMode}
+                  </li>
+                )}
+                {quotation.remarks && quotation.remarks.split('\n').filter((t: string) => t.trim() !== '').map((remark: string, idx: number) => (
                   <li key={idx} className="text-justify">{remark.trim().replace(/^[-•]\s*/, '')}</li>
                 ))}
               </ul>

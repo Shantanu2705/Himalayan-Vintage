@@ -36,6 +36,7 @@ function SettingsContent() {
   const [ifsc, setIfsc] = useState('HDFC0001234');
   const [branch, setBranch] = useState('Siliguri Main');
   const [upiId, setUpiId] = useState('himalayantaxi@hdfc');
+  const [paymentMode, setPaymentMode] = useState('UPI / Bank Transfer / Cash');
   const [qrCodeUrl, setQrCodeUrl] = useState('');
   
   // Appearance
@@ -67,6 +68,7 @@ function SettingsContent() {
       if (settings.ifsc) setIfsc(settings.ifsc);
       if (settings.branch) setBranch(settings.branch);
       if (settings.upiId) setUpiId(settings.upiId);
+      if (settings.paymentMode) setPaymentMode(settings.paymentMode);
       if (settings.qrCodeUrl) setQrCodeUrl(settings.qrCodeUrl);
       if (settings.adminFullName) setAdminFullName(settings.adminFullName);
       if (settings.adminEmail) setAdminEmail(settings.adminEmail);
@@ -93,6 +95,7 @@ function SettingsContent() {
       ifsc,
       branch,
       upiId,
+      paymentMode,
       qrCodeUrl,
       adminFullName,
       adminEmail,
@@ -282,6 +285,16 @@ function SettingsContent() {
             <div className="space-y-1.5">
               <Label className="text-[12px] text-gray-600 font-medium">UPI ID</Label>
               <Input value={upiId} onChange={e => setUpiId(e.target.value)} className="h-10 rounded-xl border-gray-200 text-[14px]" />
+            </div>
+            <div className="space-y-1.5 md:col-span-2">
+              <Label className="text-[12px] text-gray-600 font-medium">Payment Mode</Label>
+              <Input 
+                value={paymentMode} 
+                onChange={e => setPaymentMode(e.target.value)} 
+                placeholder="e.g. UPI / Bank Transfer / Cash" 
+                className="h-10 rounded-xl border-gray-200 text-[14px]" 
+              />
+              <p className="text-[11px] text-gray-400">This payment mode will be automatically fetched and displayed in all downloadable PDFs.</p>
             </div>
             <div className="space-y-2 col-span-2">
               <Label className="text-[12px] text-gray-700 font-medium">Payment QR code</Label>

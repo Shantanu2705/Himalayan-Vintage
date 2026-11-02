@@ -3,7 +3,186 @@ import { create } from 'zustand';
 import { DutySheet, DutyRow, DutyColumn, INITIAL_DUTY_SHEETS } from '@/lib/duty-data';
 import { downloadDutyExcel, downloadDutyCsv, parseUploadedExcel } from '@/lib/duty-excel';
 
-const STORAGE_KEY = 'himalayan_fleet_duty_sheets_v2';
+const STORAGE_KEY = 'himalayan_fleet_duty_sheets_v3';
+
+// Sheets that have been permanently deleted per user specification
+const DELETED_SHEET_NAMES = new Set([
+  'durga travels',
+  'mangellan',
+  'club side',
+  'karan gurung',
+  'beera',
+  'mahendra',
+  'o.n.d',
+  'dues',
+]);
+
+/**
+ * Automatically converts a confirmed quotation into individual Day Duty rows
+ * formatted identically to the Tour Duty Register standard.
+ */
+export function convertQuotationToDutyRows(q: any, receipts?: any[]): DutyRow[] {
+  if (!q) return [];
+  const qReceipts = (receipts || []).filter((r: any) =>
+    r.quotationNo === q.quotationNo || (r.bookingId && r.bookingId === q.id)
+  );
+  const totalReceived = qReceipts.reduce((sum: number, r: any) =>
+    sum + (Number(r.amount) || Number(r.receivedAmount) || 0), 0
+  );
+
+  // Parse start date
+  const startRaw = q.startDate || q.travelDate || q.date || '';
+  const startDate = startRaw ? new Date(startRaw) : new Date();
+  const validStart = !isNaN(startDate.getTime());
+
+  // Format date helper: M/D/YY (e.g. 10/17/26)
+  const formatDateMdy = (d: Date): string => {
+    const m = d.getMonth() + 1;
+    const day = d.getDate();
+    const yy = String(d.getFullYear()).slice(-2);
+    return `${m}/${day}/${yy}`;
+  };
+
+  const agent = (q.companyName || q.businessHouse || '').toUpperCase();
+  const guest = (q.clientName || q.customerName || '').toUpperCase();
+  const cellNo = q.clientPhone || q.mobile || '';
+  const pax = q.passengers ? String(q.passengers) : (q.persons ? String(q.persons) : '');
+
+  let vehicleStr = '';
+  if (q.vehicles && q.vehicles.length > 0) {
+    vehicleStr = q.vehicles
+      .map((v: any) => `${v.vehicle || v.vehicleName || 'VEHICLE'} X ${String(v.qty || v.quantity || 1).padStart(2, '0')}`)
+      .join(', ');
+  } else if (q.vehicle) {
+    vehicleStr = q.vehicle;
+  }
+  vehicleStr = vehicleStr.toUpperCase();
+
+  const totalAmountStr = q.totalAmount ? String(q.totalAmount) : (q.baseAmount ? String(q.baseAmount) : '');
+  const advStr = totalReceived > 0 ? String(totalReceived) : (q.advanceAmount ? String(q.advanceAmount) : '');
+  const remarks = q.remarks || q.notes || 'HV';
+
+  const rows: DutyRow[] = [];
+
+  if (q.itinerary && Array.isArray(q.itinerary) && q.itinerary.length > 0) {
+    q.itinerary.forEach((item: any, idx: number) => {
+      const dayDate = new Date(startDate);
+      if (validStart && idx > 0) {
+        dayDate.setDate(dayDate.getDate() + idx);
+      }
+      const dateStr = validStart ? formatDateMdy(dayDate) : '';
+      const heading = (item.heading || item.title || item.desc || '').replace(/[\[\]]/g, '').trim().toUpperCase();
+
+      if (idx === 0) {
+        // Day 1 holds client & costing summary
+        rows.push({
+          id: `duty-quote-${q.id}-${idx}`,
+          col_0: dateStr,
+          col_1: agent,
+          col_2: guest,
+          col_3: cellNo,
+          col_4: pax,
+          col_5: heading || (q.destination ? `TRANSFER TO ${q.destination.toUpperCase()}` : 'TOUR START'),
+          col_6: vehicleStr,
+          col_7: totalAmountStr,
+          col_8: advStr,
+          col_9: remarks,
+          col_10: '',
+          col_11: '',
+          col_12: '',
+          col_13: '',
+          col_14: '',
+          col_15: '',
+        });
+      } else {
+        // Subsequent days hold daily duty
+        rows.push({
+          id: `duty-quote-${q.id}-${idx}`,
+          col_0: dateStr,
+          col_1: '',
+          col_2: '',
+          col_3: '',
+          col_4: '',
+          col_5: heading || 'SIGHTSEEING / TRANSFER',
+          col_6: vehicleStr,
+          col_7: '',
+          col_8: '',
+          col_9: remarks,
+          col_10: '',
+          col_11: '',
+          col_12: '',
+          col_13: '',
+          col_14: '',
+          col_15: '',
+        });
+      }
+    });
+  } else {
+    // If no itinerary array, calculate duration between startDate and endDate
+    let numDays = 1;
+    if (q.days && Number(q.days) > 1) {
+      numDays = Number(q.days);
+    } else if (q.endDate && validStart) {
+      const end = new Date(q.endDate);
+      if (!isNaN(end.getTime())) {
+        const diffDays = Math.round((end.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+        if (diffDays > 1) numDays = diffDays;
+      }
+    }
+
+    for (let idx = 0; idx < numDays; idx++) {
+      const dayDate = new Date(startDate);
+      if (validStart && idx > 0) {
+        dayDate.setDate(dayDate.getDate() + idx);
+      }
+      const dateStr = validStart ? formatDateMdy(dayDate) : '';
+
+      if (idx === 0) {
+        rows.push({
+          id: `duty-quote-${q.id}-${idx}`,
+          col_0: dateStr,
+          col_1: agent,
+          col_2: guest,
+          col_3: cellNo,
+          col_4: pax,
+          col_5: q.destination ? `${(q.pickupLocation || 'IXB / NJP').toUpperCase()} TO ${q.destination.toUpperCase()} TRANSFER` : 'TOUR TRANSFER',
+          col_6: vehicleStr,
+          col_7: totalAmountStr,
+          col_8: advStr,
+          col_9: remarks,
+          col_10: '',
+          col_11: '',
+          col_12: '',
+          col_13: '',
+          col_14: '',
+          col_15: '',
+        });
+      } else {
+        rows.push({
+          id: `duty-quote-${q.id}-${idx}`,
+          col_0: dateStr,
+          col_1: '',
+          col_2: '',
+          col_3: '',
+          col_4: '',
+          col_5: idx === numDays - 1 ? 'TRANSFER AIRPORT / RLY STATION - TOUR END' : 'LOCAL SIGHTSEEING',
+          col_6: vehicleStr,
+          col_7: '',
+          col_8: '',
+          col_9: remarks,
+          col_10: '',
+          col_11: '',
+          col_12: '',
+          col_13: '',
+          col_14: '',
+          col_15: '',
+        });
+      }
+    }
+  }
+
+  return rows;
+}
 
 interface DutyState {
   sheets: DutySheet[];
@@ -35,6 +214,10 @@ interface DutyState {
   exportExcel: (sheetName?: string) => void;
   exportCsv: (sheetName: string) => void;
   importFile: (file: File) => Promise<{ success: boolean; count: number; error?: string }>;
+
+  // Dynamic Confirmed Quotation Integration
+  syncConfirmedQuotation: (quotation: any, receipts?: any[]) => void;
+  syncConfirmedQuotations: (quotations: any[], receipts?: any[]) => void;
 }
 
 export const useDutyStore = create<DutyState>((set, get) => ({
@@ -49,18 +232,23 @@ export const useDutyStore = create<DutyState>((set, get) => ({
     try {
       // Clear legacy cache if present
       localStorage.removeItem('himalayan_fleet_duty_sheets_v1');
+      localStorage.removeItem('himalayan_fleet_duty_sheets_v2');
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          set({ sheets: parsed, isInitialized: true });
-          return;
+          const filtered = parsed.filter((s: DutySheet) => !DELETED_SHEET_NAMES.has((s.name || '').trim().toLowerCase()));
+          if (filtered.length > 0) {
+            set({ sheets: filtered, isInitialized: true, activeSheetName: filtered[0].name });
+            return;
+          }
         }
       }
     } catch (err) {
       console.warn('Failed to parse stored duty sheets, using initial defaults:', err);
     }
-    set({ sheets: INITIAL_DUTY_SHEETS, isInitialized: true });
+    const cleanInitial = INITIAL_DUTY_SHEETS.filter((s) => !DELETED_SHEET_NAMES.has((s.name || '').trim().toLowerCase()));
+    set({ sheets: cleanInitial, isInitialized: true, activeSheetName: cleanInitial[0]?.name || 'July August' });
   },
 
   setActiveSheet: (name) => {
@@ -324,6 +512,76 @@ export const useDutyStore = create<DutyState>((set, get) => ({
     } catch (err: any) {
       console.error('Failed to import Excel file:', err);
       return { success: false, count: 0, error: err.message || 'Error parsing file' };
+    }
+  },
+
+  syncConfirmedQuotation: (quotation: any, receipts?: any[]) => {
+    if (!quotation || (quotation.status || '').toLowerCase() !== 'confirmed') return;
+    const { sheets, activeSheetName } = get();
+    const targetSheet = sheets.find((s) => s.name === activeSheetName) || sheets[0];
+    if (!targetSheet) return;
+
+    const newRows = convertQuotationToDutyRows(quotation, receipts);
+    if (newRows.length === 0) return;
+
+    // Filter out any previous rows for this quotation
+    const quoteRowPrefix = `duty-quote-${quotation.id}-`;
+    const cleanExisting = targetSheet.rows.filter((r) => !r.id.startsWith(quoteRowPrefix));
+
+    // Prepend new confirmed quotation rows
+    const updatedRows = [...newRows, ...cleanExisting];
+
+    const updated = sheets.map((s) => {
+      if (s.name !== targetSheet.name) return s;
+      return { ...s, rows: updatedRows };
+    });
+
+    set({ sheets: updated });
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+      } catch (e) {
+        console.error('Storage error:', e);
+      }
+    }
+  },
+
+  syncConfirmedQuotations: (quotations: any[], receipts?: any[]) => {
+    if (!quotations || !Array.isArray(quotations)) return;
+    const confirmed = quotations.filter((q) => (q.status || '').toLowerCase() === 'confirmed');
+    if (confirmed.length === 0) return;
+
+    const { sheets, activeSheetName } = get();
+    const targetSheet = sheets.find((s) => s.name === activeSheetName) || sheets[0];
+    if (!targetSheet) return;
+
+    let rowsCopy = [...targetSheet.rows];
+    let hasChanges = false;
+
+    confirmed.forEach((q) => {
+      const quoteRowPrefix = `duty-quote-${q.id}-`;
+      const alreadyHas = rowsCopy.some((r) => r.id.startsWith(quoteRowPrefix));
+      const newRows = convertQuotationToDutyRows(q, receipts);
+      if (!alreadyHas && newRows.length > 0) {
+        rowsCopy = [...newRows, ...rowsCopy];
+        hasChanges = true;
+      }
+    });
+
+    if (hasChanges) {
+      const updated = sheets.map((s) => {
+        if (s.name !== targetSheet.name) return s;
+        return { ...s, rows: rowsCopy };
+      });
+
+      set({ sheets: updated });
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+        } catch (e) {
+          console.error('Storage error:', e);
+        }
+      }
     }
   },
 }));

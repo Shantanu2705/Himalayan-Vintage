@@ -71,7 +71,7 @@ export const ReceiptPdfTemplate: React.FC<ReceiptPdfTemplateProps> = ({ receipt,
           <div className="grid grid-cols-2 gap-8">
             <div className="flex items-end gap-2 border-b border-dotted border-slate-400 pb-1">
               <span className="font-bold shrink-0 text-slate-600">By Cash / Cheque / DD / UPI:</span>
-              <span className="font-bold flex-1 text-slate-900 pl-4 font-mono">{receipt.paymentMethod || 'Online'}</span>
+              <span className="font-bold flex-1 text-slate-900 pl-4 font-mono">{receipt.paymentMethod || settings?.paymentMode || 'Online'}</span>
             </div>
             <div className="flex items-end gap-2 border-b border-dotted border-slate-400 pb-1">
               <span className="font-bold shrink-0 text-slate-600">Reference / Txn ID:</span>

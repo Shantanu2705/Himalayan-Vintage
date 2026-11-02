@@ -19,6 +19,7 @@ import {
   ItineraryTemplate,
 } from '@/types';
 import { FleetDatabase } from '@/services/db';
+import { useDutyStore } from './use-duty-store';
 
 interface FleetState {
   vehicles: Vehicle[];
@@ -287,10 +288,24 @@ export const useFleetStore = create<FleetState>((set, get) => ({
   addQuotation: async (q) => {
     const saved = await FleetDatabase.upsertQuotation(q);
     set((s) => ({ quotations: [saved, ...s.quotations] }));
+    if ((saved.status || '').toLowerCase() === 'confirmed') {
+      try {
+        useDutyStore.getState().syncConfirmedQuotation(saved, get().receipts);
+      } catch (e) {
+        console.error('Failed to sync confirmed quotation to duty register:', e);
+      }
+    }
   },
   updateQuotation: async (q) => {
     const saved = await FleetDatabase.upsertQuotation(q);
     set((s) => ({ quotations: s.quotations.map((item) => (item.id === saved.id ? saved : item)) }));
+    if ((saved.status || '').toLowerCase() === 'confirmed') {
+      try {
+        useDutyStore.getState().syncConfirmedQuotation(saved, get().receipts);
+      } catch (e) {
+        console.error('Failed to sync confirmed quotation to duty register:', e);
+      }
+    }
   },
   deleteQuotation: async (id) => {
     await FleetDatabase.deleteQuotation(id);

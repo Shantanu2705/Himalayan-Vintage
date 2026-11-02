@@ -98,10 +98,10 @@ export const InvoicePdfTemplate: React.FC<InvoicePdfTemplateProps> = ({ invoice,
                 <td className="py-1 text-slate-600">Supply Type:</td>
                 <td className="py-1 font-semibold text-right">{invoice.supplyType}</td>
               </tr>
-              {invoice.paymentTerms && (
+              {(invoice.paymentTerms || settings?.paymentMode) && (
                 <tr>
-                  <td className="py-1 text-slate-600">Payment Terms:</td>
-                  <td className="py-1 font-semibold text-right">{invoice.paymentTerms}</td>
+                  <td className="py-1 text-slate-600">Payment Mode / Terms:</td>
+                  <td className="py-1 font-semibold text-right">{invoice.paymentTerms || settings?.paymentMode}</td>
                 </tr>
               )}
               {invoice.travellers && (

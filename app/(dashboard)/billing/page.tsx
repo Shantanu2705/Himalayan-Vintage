@@ -22,7 +22,7 @@ import {
 function BillingHubInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { invoices, receipts, quotations, bookings, deleteReceipt, deleteInvoice, settings } = useFleetStore();
+  const { invoices, receipts, quotations, bookings, deleteReceipt, deleteInvoice, updateQuotation, updateReceipt, settings } = useFleetStore();
   const tabParam = searchParams.get('tab') as 'quotations' | 'receipts' | 'invoices';
   const [activeTab, setActiveTab] = useState<'quotations' | 'receipts' | 'invoices'>(tabParam || 'quotations');
   const [searchTerm, setSearchTerm] = useState('');
@@ -31,9 +31,17 @@ function BillingHubInner() {
   const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
   const [selectedConfirmationData, setSelectedConfirmationData] = useState<BookingConfirmationData | null>(null);
   const [selectedDocumentNo, setSelectedDocumentNo] = useState<string>('');
+  const [selectedQuotation, setSelectedQuotation] = useState<Quotation | null>(null);
+  const [selectedReceipt, setSelectedReceipt] = useState<Receipt | null>(null);
+  const [businessHouseInput, setBusinessHouseInput] = useState<string>('');
 
   const handleOpenConfirmation = (q: Quotation, totalReceived: number, qReceipts: Receipt[]) => {
-    const data = getBookingConfirmationData(q, totalReceived, qReceipts, settings);
+    setSelectedQuotation(q);
+    const latestReceipt = qReceipts && qReceipts.length > 0 ? qReceipts[qReceipts.length - 1] : null;
+    setSelectedReceipt(latestReceipt);
+    const initialBH = q.businessHouse || latestReceipt?.businessHouse || q.companyName || '';
+    setBusinessHouseInput(initialBH);
+    const data = getBookingConfirmationData(q, totalReceived, qReceipts, settings, initialBH);
     setSelectedConfirmationData(data);
     setSelectedDocumentNo(q.quotationNo || 'Confirmation');
     setIsConfirmationOpen(true);
@@ -330,7 +338,11 @@ function BillingHubInner() {
                             onClick={(e) => {
                               e.stopPropagation();
                               const relatedQ = quotations.find(q => q.quotationNo === r.quotationNo || (r.bookingId && q.id === r.bookingId));
-                              const confData = getBookingConfirmationData(relatedQ || null, received, [r], settings);
+                              const initialBH = r.businessHouse || relatedQ?.businessHouse || relatedQ?.companyName || '';
+                              setBusinessHouseInput(initialBH);
+                              setSelectedQuotation(relatedQ || null);
+                              setSelectedReceipt(r);
+                              const confData = getBookingConfirmationData(relatedQ || null, received, [r], settings, initialBH);
                               setSelectedConfirmationData(confData);
                               setSelectedDocumentNo(r.receiptNo || 'Confirmation');
                               setIsConfirmationOpen(true);
@@ -449,6 +461,32 @@ function BillingHubInner() {
             documentNo={selectedDocumentNo}
             hidePrintBorder={true}
           >
+            {/* Admin Business House Controller Bar (visible in modal preview, hidden in print) */}
+            <div className="mb-5 bg-emerald-50/90 border border-emerald-200/80 rounded-xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 no-print">
+              <div className="flex items-center gap-2.5 flex-1">
+                <span className="text-[12px] font-bold text-emerald-950 shrink-0">Business House:</span>
+                <Input
+                  value={businessHouseInput}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setBusinessHouseInput(val);
+                    setSelectedConfirmationData((prev) => (prev ? { ...prev, businessHouse: val } : null));
+                    if (selectedQuotation) {
+                      updateQuotation({ ...selectedQuotation, businessHouse: val });
+                    }
+                    if (selectedReceipt) {
+                      updateReceipt({ ...selectedReceipt, businessHouse: val });
+                    }
+                  }}
+                  placeholder="Enter Business House (e.g. Travel Amore)"
+                  className="h-8 text-xs bg-white border-emerald-300 text-gray-800 rounded-lg max-w-sm"
+                />
+              </div>
+              <span className="text-[11px] font-medium text-emerald-700 italic">
+                Different per confirmation PDF
+              </span>
+            </div>
+
             <BookingConfirmationPdfTemplate data={selectedConfirmationData} />
           </PdfPreviewModal>
         )}

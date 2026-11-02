@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import { useDutyStore } from '@/lib/store/use-duty-store';
+import { useFleetStore } from '@/lib/store/use-fleet-store';
 import { DutyColumn, DutyRow, parseDutyDate } from '@/lib/duty-data';
 import { Button, cn } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -43,6 +44,7 @@ import {
 } from 'lucide-react';
 
 export default function DutyRegisterPage() {
+  const { quotations, receipts } = useFleetStore();
   const {
     sheets,
     activeSheetName,
@@ -62,6 +64,7 @@ export default function DutyRegisterPage() {
     exportExcel,
     exportCsv,
     importFile,
+    syncConfirmedQuotations,
   } = useDutyStore();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -91,6 +94,13 @@ export default function DutyRegisterPage() {
   useEffect(() => {
     initialize();
   }, [initialize]);
+
+  // Dynamically sync confirmed quotations into Duty Register whenever loaded or updated
+  useEffect(() => {
+    if (isInitialized && quotations && quotations.length > 0) {
+      syncConfirmedQuotations(quotations, receipts);
+    }
+  }, [isInitialized, quotations, receipts, syncConfirmedQuotations]);
 
   const activeSheet = useMemo(() => {
     return sheets.find((s) => s.name === activeSheetName) || sheets[0];

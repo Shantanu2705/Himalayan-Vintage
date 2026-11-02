@@ -198,6 +198,7 @@ export interface Quotation {
   clientPhone?: string;
   clientEmail?: string;
   companyName?: string;
+  businessHouse?: string;
   gstin?: string;
   pickupLocation: string;
   vehicle: string;
@@ -460,6 +461,7 @@ export interface CompanySettings {
   ifsc?: string;
   branch?: string;
   upiId?: string;
+  paymentMode?: string;
   qrCodeUrl?: string;
   companyGstin?: string;
   gstin?: string;

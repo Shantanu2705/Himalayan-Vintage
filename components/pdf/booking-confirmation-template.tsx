@@ -95,7 +95,8 @@ export function getBookingConfirmationData(
   quotation: any,
   totalReceived?: number,
   receipts?: any[],
-  settings?: CompanySettings | null
+  settings?: CompanySettings | null,
+  manualBusinessHouse?: string
 ): BookingConfirmationData {
   const qReceipt = receipts && receipts.length > 0 ? receipts[receipts.length - 1] : null;
 
@@ -105,8 +106,8 @@ export function getBookingConfirmationData(
     rawName = `Mr. ${rawName.trim()}`;
   }
 
-  // 2. Business House / Agency
-  const businessHouse = quotation?.companyName || qReceipt?.businessHouse || 'Travel Amore';
+  // 2. Business House / Agency (manually entered by admin or saved per quotation/receipt)
+  const businessHouse = manualBusinessHouse?.trim() || quotation?.businessHouse || quotation?.companyName || qReceipt?.businessHouse || 'Travel Amore';
 
   // 3. Cell No
   const cellNo = quotation?.clientPhone || quotation?.mobile || qReceipt?.clientMobile || '8436378176';
@@ -189,19 +190,17 @@ export function getBookingConfirmationData(
   // 12. Stay
   const stay = qReceipt?.stayDetails || quotation?.destination || 'Gangtok, Pelling and Darjeeling';
 
-  // 13. Duties
+  // 13. Duties (only itinerary headings without information/descriptions)
   let duties: string[] = [];
   if (quotation?.itinerary && quotation.itinerary.length > 0) {
-    duties = quotation.itinerary.map((item: any, idx: number) => {
-      const heading = (item.heading || item.title || '').trim();
-      const desc = (item.desc || item.description || '').trim();
-      if (heading && desc) {
-        return `${heading} – ${desc}`;
-      }
-      return desc || heading || 'Sightseeing and transfer as per schedule';
-    });
+    duties = quotation.itinerary
+      .map((item: any) => {
+        const heading = (item.heading || item.title || '').replace(/[\[\]]/g, '').trim();
+        return heading;
+      })
+      .filter(Boolean);
   } else if (qReceipt?.duty && qReceipt.duty !== 'As per given itinerary') {
-    duties = qReceipt.duty.split('\n').filter(Boolean);
+    duties = qReceipt.duty.split('\n').map((line: string) => line.trim()).filter(Boolean);
   } else {
     duties = [
       'Reach NJP Rly / IXB Bagdogra to transfer Gangtok – Overnight stay at Gangtok',
