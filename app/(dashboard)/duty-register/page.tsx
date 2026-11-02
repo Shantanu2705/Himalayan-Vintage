@@ -293,6 +293,19 @@ export default function DutyRegisterPage() {
       activeSheet.columns.forEach((col) => {
         initial[col.key] = '';
       });
+      // Pre-fill date with current date formatted like M/D/YY (e.g. 11/2/26) if date column exists
+      const dateCol = activeSheet.columns.find((c) =>
+        c.type === 'date' ||
+        c.name.toLowerCase().includes('date') ||
+        c.originalHeader.toLowerCase().includes('date')
+      );
+      if (dateCol) {
+        const today = new Date();
+        const m = today.getMonth() + 1;
+        const d = today.getDate();
+        const y = String(today.getFullYear()).slice(-2);
+        initial[dateCol.key] = `${m}/${d}/${y}`;
+      }
     }
     setActiveRowData(initial);
     setIsAddRowOpen(true);
@@ -300,9 +313,11 @@ export default function DutyRegisterPage() {
 
   const handleSaveAddRow = () => {
     if (!activeSheet) return;
-    addRow(activeSheet.name, activeRowData);
+    // Insert new row at the top
+    addRow(activeSheet.name, activeRowData, 0);
+    setCurrentPage(1);
     setIsAddRowOpen(false);
-    showNotice('New duty record added successfully');
+    showNotice('New duty record added successfully at serial #1');
   };
 
   const handleOpenEditRow = (row: DutyRow) => {
@@ -473,10 +488,11 @@ export default function DutyRegisterPage() {
           <Button
             size="sm"
             onClick={handleOpenAddRow}
-            className="h-9 gap-1.5 bg-yellow-600 text-xs font-semibold text-white shadow-sm hover:bg-yellow-700"
+            className="h-9 gap-1.5 bg-yellow-600 text-xs font-bold text-white shadow-sm hover:bg-yellow-700"
+            title="Add data (Date, Agent, Guest, Cell no, Pax, Itinerary, Vehicle...)"
           >
             <Plus className="h-4 w-4" />
-            <span>Add Duty Record</span>
+            <span>+ Add Data (Row)</span>
           </Button>
 
           <Button
@@ -666,11 +682,22 @@ export default function DutyRegisterPage() {
 
             <Button
               size="sm"
-              onClick={() => setIsAddColOpen(true)}
-              className="h-8 text-xs gap-1.5 bg-emerald-700 hover:bg-emerald-800 text-white font-semibold shadow-sm"
-              title={`Add new column to ${activeSheet?.name}`}
+              onClick={handleOpenAddRow}
+              className="h-8 text-xs gap-1.5 bg-green-900 hover:bg-green-800 text-white font-bold shadow-sm"
+              title="Add data row (Date, Agent, Guest, Itinerary, Vehicle...)"
             >
               <Plus className="h-3.5 w-3.5" />
+              <span>+ Add Data (Row)</span>
+            </Button>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsAddColOpen(true)}
+              className="h-8 text-xs gap-1 border-gray-200 text-gray-700 hover:bg-gray-100"
+              title={`Add new column structure to ${activeSheet?.name}`}
+            >
+              <Plus className="h-3 w-3" />
               <span>Add Column</span>
             </Button>
           </div>
@@ -685,13 +712,12 @@ export default function DutyRegisterPage() {
           </div>
           <div className="flex items-center gap-2">
             <Button
-              variant="outline"
               size="sm"
-              onClick={() => setIsAddColOpen(true)}
-              className="h-6 px-2 text-[11px] gap-1 border-emerald-300 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 font-semibold"
+              onClick={handleOpenAddRow}
+              className="h-6 px-2.5 text-[11px] gap-1 bg-green-900 hover:bg-green-800 text-white font-semibold shadow-xs"
             >
-              <Plus className="h-3 w-3 text-emerald-700" />
-              <span>Add Column</span>
+              <Plus className="h-3 w-3" />
+              <span>+ Add Data Entry</span>
             </Button>
             <span className="font-medium">💡 Tip: Double-click or click any cell to edit directly!</span>
           </div>
@@ -702,8 +728,8 @@ export default function DutyRegisterPage() {
           <table className="w-full text-left text-xs border-collapse">
             <thead className="sticky top-0 z-20 bg-green-950 text-white shadow-sm">
               <tr>
-                <th className="sticky left-0 z-30 bg-green-950 px-3 py-3 w-12 text-center text-[11px] font-bold tracking-wider uppercase border-r border-green-800">
-                  #
+                <th className="sticky left-0 z-30 bg-green-950 px-3 py-3 w-14 text-center text-[11px] font-bold tracking-wider uppercase border-r border-green-800" title="Serial Number">
+                  # SL
                 </th>
                 {activeSheet?.columns.map((col, idx) => {
                   const currentSortKey = sortKey || activeDateColKey;
@@ -764,6 +790,28 @@ export default function DutyRegisterPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+              {/* Quick Add Row banner */}
+              <tr
+                onClick={handleOpenAddRow}
+                className="cursor-pointer bg-emerald-50/50 hover:bg-emerald-100/70 dark:bg-emerald-950/20 dark:hover:bg-emerald-950/40 transition-colors border-b border-dashed border-emerald-300 dark:border-emerald-800"
+                title="Click here to add a new data entry (Date, Agent, Guest, Itinerary, Vehicle...)"
+              >
+                <td className="sticky left-0 z-10 bg-emerald-50/90 dark:bg-emerald-950/90 px-3 py-2 text-center text-xs font-bold font-mono text-emerald-800 dark:text-emerald-300 border-r border-emerald-200 dark:border-emerald-800">
+                  <Plus className="h-3.5 w-3.5 mx-auto" />
+                </td>
+                <td
+                  colSpan={(activeSheet?.columns.length || 0) + 1}
+                  className="px-4 py-2 text-xs font-semibold text-emerald-900 dark:text-emerald-200"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold">+ Add New Data Row</span>
+                    <span className="text-[11px] font-normal text-emerald-700 dark:text-emerald-400">
+                      (Click to manually enter Date, Agent, Guest, Cell no, Pax, Itinerary, Vehicle, etc. - Serial # shown accordingly)
+                    </span>
+                  </div>
+                </td>
+              </tr>
+
               {paginatedRows.length === 0 ? (
                 <tr>
                   <td
@@ -797,7 +845,7 @@ export default function DutyRegisterPage() {
                     )?.[1];
                     return (
                       <tr key={row.id} className="bg-green-100/60 dark:bg-green-950/40">
-                        <td className="sticky left-0 bg-green-100/90 dark:bg-green-950/90 px-3 py-2 text-center font-bold text-green-900 text-[10px] border-r">
+                        <td className="sticky left-0 bg-green-100/90 dark:bg-green-950/90 px-3 py-2 text-center font-bold text-green-900 text-[11px] font-mono border-r">
                           {absoluteIndex}
                         </td>
                         <td
@@ -822,7 +870,7 @@ export default function DutyRegisterPage() {
                       className="group transition-colors hover:bg-green-50/40 dark:hover:bg-green-950/20"
                     >
                       {/* Row Index */}
-                      <td className="sticky left-0 z-10 bg-white group-hover:bg-green-50/90 dark:bg-gray-900 dark:group-hover:bg-green-950/90 px-3 py-2 text-center text-[11px] text-muted-foreground border-r border-gray-100 dark:border-gray-800 font-mono">
+                      <td className="sticky left-0 z-10 bg-white group-hover:bg-green-50/90 dark:bg-gray-900 dark:group-hover:bg-green-950/90 px-3 py-2 text-center text-[12px] font-bold text-gray-800 dark:text-gray-200 border-r border-gray-100 dark:border-gray-800 font-mono">
                         {absoluteIndex}
                       </td>
 
@@ -961,30 +1009,64 @@ export default function DutyRegisterPage() {
       <Dialog open={isAddRowOpen} onOpenChange={setIsAddRowOpen}>
         <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-lg font-bold text-green-950">
-              <Plus className="h-5 w-5 text-yellow-600" />
-              <span>Add Duty Record to {activeSheet?.name}</span>
-            </DialogTitle>
+            <div className="flex items-center justify-between">
+              <DialogTitle className="flex items-center gap-2 text-lg font-bold text-green-950">
+                <Plus className="h-5 w-5 text-emerald-700" />
+                <span>Add Data (Row) to {activeSheet?.name}</span>
+              </DialogTitle>
+              <Badge variant="outline" className="border-green-700 bg-green-50 text-green-800 text-xs font-bold">
+                Serial #1 (Top)
+              </Badge>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Enter details for Date, Agent, Guest, Cell no, Pax, Itinerary, Vehicle, Amount, etc. The serial number will be assigned automatically.
+            </p>
           </DialogHeader>
           <div className="grid grid-cols-1 gap-3 py-3 sm:grid-cols-2">
-            {activeSheet?.columns.map((col) => (
-              <div key={col.key} className="space-y-1">
-                <Label className="text-xs font-semibold text-gray-700">
-                  {col.originalHeader}
-                  {col.name !== col.originalHeader && (
-                    <span className="text-[10px] text-muted-foreground ml-1">({col.name})</span>
-                  )}
-                </Label>
-                <Input
-                  value={activeRowData[col.key] || ''}
-                  onChange={(e) =>
-                    setActiveRowData((prev) => ({ ...prev, [col.key]: e.target.value }))
-                  }
-                  placeholder={`Enter ${col.originalHeader}...`}
-                  className="h-9 text-xs"
-                />
-              </div>
-            ))}
+            {activeSheet?.columns.map((col) => {
+              const isItinerary = col.originalHeader.toLowerCase().includes('itinerary');
+              const placeholder =
+                col.originalHeader.toLowerCase().includes('date')
+                  ? 'e.g. 10/25/26 (M/D/YY)'
+                  : col.originalHeader.toLowerCase().includes('agent')
+                  ? 'e.g. HAPPY HOLIDAYS'
+                  : col.originalHeader.toLowerCase().includes('guest')
+                  ? 'e.g. PRAGYA UJWALA'
+                  : col.originalHeader.toLowerCase().includes('cell') || col.originalHeader.toLowerCase().includes('phone')
+                  ? 'e.g. 7077100478'
+                  : col.originalHeader.toLowerCase().includes('pax')
+                  ? 'e.g. 4 or 11'
+                  : isItinerary
+                  ? 'e.g. IXB - GANGTOK TRANSFER - OVERNIGHT STAY AT GANGTOK'
+                  : col.originalHeader.toLowerCase().includes('vehicle')
+                  ? 'e.g. 11 SEATER TT / INNOVA'
+                  : col.originalHeader.toLowerCase().includes('amount')
+                  ? 'e.g. 38000'
+                  : col.originalHeader.toLowerCase().includes('adv')
+                  ? 'e.g. 5000 or HV'
+                  : col.originalHeader.toLowerCase().includes('remarks')
+                  ? 'e.g. Advance paid / HV'
+                  : `Enter ${col.originalHeader}...`;
+
+              return (
+                <div key={col.key} className={cn('space-y-1', isItinerary && 'sm:col-span-2')}>
+                  <Label className="text-xs font-semibold text-gray-700">
+                    {col.originalHeader}
+                    {col.name !== col.originalHeader && (
+                      <span className="text-[10px] text-muted-foreground ml-1">({col.name})</span>
+                    )}
+                  </Label>
+                  <Input
+                    value={activeRowData[col.key] || ''}
+                    onChange={(e) =>
+                      setActiveRowData((prev) => ({ ...prev, [col.key]: e.target.value }))
+                    }
+                    placeholder={placeholder}
+                    className="h-9 text-xs"
+                  />
+                </div>
+              );
+            })}
           </div>
           <DialogFooter className="gap-2">
             <Button variant="outline" size="sm" onClick={() => setIsAddRowOpen(false)}>
@@ -993,9 +1075,10 @@ export default function DutyRegisterPage() {
             <Button
               size="sm"
               onClick={handleSaveAddRow}
-              className="bg-green-900 text-white hover:bg-green-800"
+              className="bg-green-900 text-white hover:bg-green-800 gap-1.5 font-bold"
             >
-              Add Record
+              <Plus className="h-4 w-4" />
+              <span>Save & Add Data</span>
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1011,23 +1094,26 @@ export default function DutyRegisterPage() {
             </DialogTitle>
           </DialogHeader>
           <div className="grid grid-cols-1 gap-3 py-3 sm:grid-cols-2">
-            {activeSheet?.columns.map((col) => (
-              <div key={col.key} className="space-y-1">
-                <Label className="text-xs font-semibold text-gray-700">
-                  {col.originalHeader}
-                  {col.name !== col.originalHeader && (
-                    <span className="text-[10px] text-muted-foreground ml-1">({col.name})</span>
-                  )}
-                </Label>
-                <Input
-                  value={activeRowData[col.key] || ''}
-                  onChange={(e) =>
-                    setActiveRowData((prev) => ({ ...prev, [col.key]: e.target.value }))
-                  }
-                  className="h-9 text-xs"
-                />
-              </div>
-            ))}
+            {activeSheet?.columns.map((col) => {
+              const isItinerary = col.originalHeader.toLowerCase().includes('itinerary');
+              return (
+                <div key={col.key} className={cn('space-y-1', isItinerary && 'sm:col-span-2')}>
+                  <Label className="text-xs font-semibold text-gray-700">
+                    {col.originalHeader}
+                    {col.name !== col.originalHeader && (
+                      <span className="text-[10px] text-muted-foreground ml-1">({col.name})</span>
+                    )}
+                  </Label>
+                  <Input
+                    value={activeRowData[col.key] || ''}
+                    onChange={(e) =>
+                      setActiveRowData((prev) => ({ ...prev, [col.key]: e.target.value }))
+                    }
+                    className="h-9 text-xs"
+                  />
+                </div>
+              );
+            })}
           </div>
           <DialogFooter className="gap-2">
             <Button variant="outline" size="sm" onClick={() => setIsEditRowOpen(false)}>

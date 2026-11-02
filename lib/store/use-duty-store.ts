@@ -320,7 +320,8 @@ export const useDutyStore = create<DutyState>((set, get) => ({
       if (typeof insertAtIndex === 'number' && insertAtIndex >= 0 && insertAtIndex <= rowsCopy.length) {
         rowsCopy.splice(insertAtIndex, 0, newRow);
       } else {
-        rowsCopy.push(newRow);
+        // Insert at the top so newly entered data immediately appears as row #1
+        rowsCopy.unshift(newRow);
       }
       return { ...sheet, rows: rowsCopy };
     });
