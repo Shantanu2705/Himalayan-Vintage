@@ -317,7 +317,7 @@ export default function DutyRegisterPage() {
     addRow(activeSheet.name, activeRowData, 0);
     setCurrentPage(1);
     setIsAddRowOpen(false);
-    showNotice('New duty record added successfully at serial #1');
+    showNotice('New duty record added successfully');
   };
 
   const handleOpenEditRow = (row: DutyRow) => {
@@ -389,6 +389,8 @@ export default function DutyRegisterPage() {
   // Check if row is a section header (like "October", "November" where only 1 cell has value)
   const isSectionDividerRow = (row: DutyRow) => {
     if (!activeSheet) return false;
+    // User-added records or synced quotation records are always editable full rows, never section dividers
+    if (row.id.startsWith('row-') || row.id.startsWith('duty-quote-')) return false;
     const values = activeSheet.columns.map((c) => (row[c.key] || '').trim()).filter(Boolean);
     return values.length === 1 && values[0].length < 35 && !values[0].includes('http');
   };
@@ -844,12 +846,12 @@ export default function DutyRegisterPage() {
                       ([k, v]) => k !== 'id' && String(v).trim() !== ''
                     )?.[1];
                     return (
-                      <tr key={row.id} className="bg-green-100/60 dark:bg-green-950/40">
+                      <tr key={row.id} className="bg-green-100/60 dark:bg-green-950/40 group">
                         <td className="sticky left-0 bg-green-100/90 dark:bg-green-950/90 px-3 py-2 text-center font-bold text-green-900 text-[11px] font-mono border-r">
                           {absoluteIndex}
                         </td>
                         <td
-                          colSpan={(activeSheet?.columns.length || 0) + 1}
+                          colSpan={activeSheet?.columns.length || 0}
                           className="px-4 py-2 text-xs font-extrabold uppercase tracking-wider text-green-950 dark:text-green-200"
                         >
                           <div className="flex items-center gap-2">
@@ -858,6 +860,24 @@ export default function DutyRegisterPage() {
                             <Badge variant="outline" className="text-[10px] bg-white text-green-900 border-green-300">
                               Section Header
                             </Badge>
+                          </div>
+                        </td>
+                        <td className="sticky right-0 z-10 bg-green-100/90 dark:bg-green-950/90 px-2 py-1.5 text-center border-l border-green-200 dark:border-green-800">
+                          <div className="flex items-center justify-center gap-1">
+                            <button
+                              onClick={() => handleOpenEditRow(row)}
+                              className="rounded p-1 text-gray-600 hover:bg-green-200/60 hover:text-green-900"
+                              title="Edit section header"
+                            >
+                              <Pencil className="h-3.5 w-3.5" />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteRow(row.id)}
+                              className="rounded p-1 text-gray-600 hover:bg-red-50 hover:text-red-600"
+                              title="Delete section header"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
                           </div>
                         </td>
                       </tr>
@@ -883,12 +903,20 @@ export default function DutyRegisterPage() {
                         return (
                           <td
                             key={col.key}
+                            onClick={() => {
+                              if (!editingCell || editingCell.rowId !== row.id || editingCell.colKey !== col.key) {
+                                handleStartCellEdit(row.id, col.key, val);
+                              }
+                            }}
                             onDoubleClick={() => handleStartCellEdit(row.id, col.key, val)}
                             className="px-3 py-2 border-r border-gray-100 dark:border-gray-800 whitespace-nowrap text-[12px] max-w-xs truncate cursor-pointer hover:bg-yellow-50/80 dark:hover:bg-yellow-950/30 transition-colors"
                             title="Click or double-click to edit cell"
                           >
                             {isEditing ? (
-                              <div className="flex items-center gap-1">
+                              <div
+                                className="flex items-center gap-1"
+                                onClick={(e) => e.stopPropagation()}
+                              >
                                 <Input
                                   autoFocus
                                   value={cellValue}
@@ -898,8 +926,12 @@ export default function DutyRegisterPage() {
                                   className="h-7 text-xs px-1.5 py-0 rounded border-green-700 bg-white shadow-sm ring-1 ring-green-600"
                                 />
                                 <button
-                                  onClick={handleSaveCellEdit}
+                                  onMouseDown={(e) => {
+                                    e.preventDefault();
+                                    handleSaveCellEdit();
+                                  }}
                                   className="p-1 rounded bg-green-700 text-white hover:bg-green-800"
+                                  title="Save cell"
                                 >
                                   <Check className="h-3 w-3" />
                                 </button>
@@ -1009,15 +1041,10 @@ export default function DutyRegisterPage() {
       <Dialog open={isAddRowOpen} onOpenChange={setIsAddRowOpen}>
         <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <div className="flex items-center justify-between">
-              <DialogTitle className="flex items-center gap-2 text-lg font-bold text-green-950">
-                <Plus className="h-5 w-5 text-emerald-700" />
-                <span>Add Data (Row) to {activeSheet?.name}</span>
-              </DialogTitle>
-              <Badge variant="outline" className="border-green-700 bg-green-50 text-green-800 text-xs font-bold">
-                Serial #1 (Top)
-              </Badge>
-            </div>
+            <DialogTitle className="flex items-center gap-2 text-lg font-bold text-green-950">
+              <Plus className="h-5 w-5 text-emerald-700" />
+              <span>Add Data (Row) to {activeSheet?.name}</span>
+            </DialogTitle>
             <p className="text-xs text-muted-foreground mt-1">
               Enter details for Date, Agent, Guest, Cell no, Pax, Itinerary, Vehicle, Amount, etc. The serial number will be assigned automatically.
             </p>
